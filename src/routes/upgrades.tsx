@@ -27,11 +27,31 @@ function CardSkeleton() {
   );
 }
 
+const DEFAULT_PLAYERS_LIST: PlayerDoc[] = UPGRADES.map((u, idx) => ({
+  ...u,
+  active: true,
+  sortOrder: idx + 1,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
+
 function UpgradesPage() {
-  const [players, setPlayers] = useState<PlayerDoc[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState<PlayerDoc[]>(() => {
+    try {
+      const cached = localStorage.getItem("rdg-cached-players");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      /* ignore */
+    }
+    return DEFAULT_PLAYERS_LIST;
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       try {
         const snap = await getDocs(collection(db, "players"));
@@ -49,35 +69,24 @@ function UpgradesPage() {
           .filter((p) => p.active !== false)
           .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
 
-        if (list.length > 0) {
+        if (isMounted && list.length > 0) {
           setPlayers(list);
-        } else {
-          setPlayers(
-            UPGRADES.map((u, idx) => ({
-              ...u,
-              active: true,
-              sortOrder: idx + 1,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            })),
-          );
+          try {
+            localStorage.setItem("rdg-cached-players", JSON.stringify(list));
+          } catch {
+            /* ignore */
+          }
         }
       } catch (e) {
-        console.warn("Firestore players fetch error, using default catalog:", e);
-        setPlayers(
-          UPGRADES.map((u, idx) => ({
-            ...u,
-            active: true,
-            sortOrder: idx + 1,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          })),
-        );
+        console.warn("Firestore players fetch error:", e);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     void load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

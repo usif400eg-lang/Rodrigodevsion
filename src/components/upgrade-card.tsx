@@ -15,13 +15,13 @@ export function UpgradeCard({ player }: { player: PlayerDoc }) {
 
   return (
     <article className="flex flex-col items-center w-full">
-      <Link to="/order" search={{ service: "player" }} className="block w-full max-w-48">
+      <Link to="/order" search={{ service: "player" }} className="block w-full max-w-52 sm:max-w-56 transition-transform duration-300 hover:scale-[1.03]">
         {/* ── Card shell ── */}
         <div
-          className={`relative aspect-[3/4] overflow-hidden rounded-xl shadow-lg ${STYLE[player.style] ?? "card-epic"}`}
-          style={{ padding: "3px" }}
+          className={`relative aspect-[3/4] overflow-hidden rounded-2xl shadow-xl ${STYLE[player.style] ?? "card-epic"}`}
+          style={{ padding: "3.5px" }}
         >
-          <div className="relative flex h-full flex-col rounded-[10px] bg-[#1a1028] overflow-hidden">
+          <div className="relative flex h-full flex-col rounded-[12px] bg-[#1a1028] overflow-hidden">
 
             {/* ── Full player image as background ── */}
             {player.imageUrl ? (
@@ -39,8 +39,10 @@ export function UpgradeCard({ player }: { player: PlayerDoc }) {
               </div>
             )}
 
-            {/* ── Gradient overlay (bottom fade for text legibility) ── */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            {/* ── Professional downward & upward reflection gradient overlays ── */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/15 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
 
             {/* ── Top row: rating + position | club badge ── */}
             <div className="relative z-10 flex items-start justify-between p-2.5 text-white">
