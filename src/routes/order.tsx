@@ -5,7 +5,7 @@ import { Check, Clock, HelpCircle, MessageCircle, Phone, ShieldCheck } from "luc
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { db } from "@/lib/firebase";
-import type { ContactSettingsDoc, QuestionDoc, ServiceDoc } from "@/lib/firebase-types";
+import type { ContactSettingsDoc, PlayerDoc, QuestionDoc, ServiceDoc } from "@/lib/firebase-types";
 import { SERVICES } from "@/lib/catalog";
 import { createOrderFirestore } from "@/lib/orders";
 import { z } from "zod";
@@ -18,6 +18,27 @@ export const Route = createFileRoute("/order")({
   validateSearch: searchSchema,
   component: OrderPage,
 });
+
+interface GuaranteePlayerOption {
+  id: string;
+  name: string;
+  rating?: number;
+  style?: string;
+  position?: string;
+  imageUrl?: string;
+}
+
+const DEFAULT_GUARANTEE_PLAYERS: GuaranteePlayerOption[] = [
+  { id: "p1", name: "ليونيل ميسي (Lionel Messi)", rating: 105, style: "Big Time / Epic", position: "RWF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p2", name: "كريستيانو رونالدو (Cristiano Ronaldo)", rating: 104, style: "Epic", position: "CF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p3", name: "رونالدينيو (Ronaldinho)", rating: 103, style: "Epic", position: "AMF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p4", name: "نيمار دا سيلفا (Neymar Jr)", rating: 102, style: "Showtime", position: "LWF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p5", name: "فرانك ريكارد (Frank Rijkaard)", rating: 103, style: "Epic", position: "DMF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p6", name: "باولو مالديني (Paolo Maldini)", rating: 104, style: "Epic", position: "CB", imageUrl: "/badges/player-epic.svg" },
+  { id: "p7", name: "باتريك فييرا (Patrick Vieira)", rating: 104, style: "Epic", position: "DMF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p8", name: "كاكا (Kaká)", rating: 102, style: "Epic", position: "AMF", imageUrl: "/badges/player-epic.svg" },
+  { id: "p9", name: "كيليان مبابي (Kylian Mbappé)", rating: 102, style: "Highlight", position: "CF", imageUrl: "/badges/player-epic.svg" },
+];
 
 // Session anti-spam
 const SESSION_KEY = "rdg-session-orders";
@@ -81,6 +102,11 @@ function OrderPage() {
   const [fallbackPlayerName, setFallbackPlayerName] = useState("");
   const [fallbackNotes, setFallbackNotes] = useState("");
 
+  // Players catalog for Player Guarantee selection
+  const [playersList, setPlayersList] = useState<PlayerDoc[]>([]);
+  const [isCustomPlayer, setIsCustomPlayer] = useState(false);
+  const [customPlayerText, setCustomPlayerText] = useState("");
+
   // Load services and contact
   useEffect(() => {
     const load = async () => {
@@ -138,6 +164,39 @@ function OrderPage() {
     };
     void load();
   }, [serviceParam]);
+
+  // Load players for guarantee selection
+  useEffect(() => {
+    async function loadPlayers() {
+      try {
+        const snap = await getDocs(collection(db, "players"));
+        const pl = snap.docs
+          .map((d) => ({ ...(d.data() as PlayerDoc), id: d.id }))
+          .filter((p) => p.active !== false)
+          .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        setPlayersList(pl);
+      } catch (err) {
+        console.warn("Could not load players:", err);
+      }
+    }
+    void loadPlayers();
+  }, []);
+
+  const availablePlayerOptions: GuaranteePlayerOption[] =
+    playersList.length > 0
+      ? playersList.map((p) => ({
+          id: p.id,
+          name: p.name,
+          rating: p.rating,
+          style: p.style,
+          position: p.position,
+          imageUrl: p.imageUrl,
+        }))
+      : DEFAULT_GUARANTEE_PLAYERS;
+
+  const selectedPlayerObj = availablePlayerOptions.find(
+    (p) => p.name === fallbackPlayerName,
+  );
 
   // Load dynamic questions if service has a formId
   useEffect(() => {
@@ -563,18 +622,113 @@ function OrderPage() {
                       </div>
                     </>
                   ) : (
-                    <div>
-                      <label className="block text-xs font-bold text-fg mb-1">
-                        اسم اللاعب المطلوب ضمانه *
+                    <div className="space-y-3">
+                      <label className="block text-xs font-bold text-fg flex items-center justify-between">
+                        <span>اختر اللاعب المطلوب ضمانه *</span>
+                        <span className="text-[11px] font-normal text-muted">من قائمة اللاعبين أو كتابة يدوية</span>
                       </label>
-                      <input
-                        type="text"
-                        required
-                        value={fallbackPlayerName}
-                        onChange={(e) => setFallbackPlayerName(e.target.value)}
-                        placeholder="مثال: ميسي / رونالدينيو"
-                        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary"
-                      />
+
+                      {/* Dropdown Selector */}
+                      <select
+                        className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold outline-none focus:border-primary"
+                        value={isCustomPlayer ? "__custom__" : (fallbackPlayerName || "")}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "__custom__") {
+                            setIsCustomPlayer(true);
+                            setFallbackPlayerName(customPlayerText);
+                          } else {
+                            setIsCustomPlayer(false);
+                            setFallbackPlayerName(val);
+                          }
+                        }}
+                      >
+                        <option value="" disabled>-- اضغط لاختيار اللاعب من القائمة --</option>
+                        {availablePlayerOptions.map((p) => (
+                          <option key={p.id} value={p.name}>
+                            ⚽ {p.name} {p.rating ? `(${p.rating})` : ""} {p.style ? `— ${p.style}` : ""}
+                          </option>
+                        ))}
+                        <option value="__custom__">✍️ لاعب آخر غير موجود بالقائمة (كتابة يدوية)</option>
+                      </select>
+
+                      {/* Quick chips for quick tap on mobile */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                        <span className="text-[10px] text-muted ml-1">اختيارات سريعة:</span>
+                        {availablePlayerOptions.slice(0, 5).map((p) => {
+                          const isSelected = !isCustomPlayer && fallbackPlayerName === p.name;
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                setIsCustomPlayer(false);
+                                setFallbackPlayerName(p.name);
+                              }}
+                              className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition flex items-center gap-1 ${
+                                isSelected
+                                  ? "bg-primary text-white shadow-xs"
+                                  : "border border-border bg-surface text-fg hover:border-primary"
+                              }`}
+                            >
+                              <span>{p.name.split(" ")[0]}</span>
+                              {p.rating && <span className="opacity-75 text-[10px]">({p.rating})</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Custom text input if custom chosen or manual */}
+                      {isCustomPlayer && (
+                        <div className="pt-2 animate-in fade-in duration-200">
+                          <label className="block text-xs font-bold text-fg mb-1">
+                            اكتب اسم اللاعب المطلوب يدوياً *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={customPlayerText}
+                            onChange={(e) => {
+                              setCustomPlayerText(e.target.value);
+                              setFallbackPlayerName(e.target.value);
+                            }}
+                            placeholder="مثال: باتريك فييرا / كاكا / روبرتو كارلوس"
+                            className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:border-primary"
+                          />
+                        </div>
+                      )}
+
+                      {/* Selected Player Preview Card */}
+                      {selectedPlayerObj && !isCustomPlayer && (
+                        <div className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-3 animate-in fade-in">
+                          {selectedPlayerObj.imageUrl ? (
+                            <img
+                              src={selectedPlayerObj.imageUrl}
+                              alt=""
+                              className="size-12 rounded-xl object-contain border border-border bg-card shadow-xs"
+                            />
+                          ) : (
+                            <div className="size-12 rounded-xl border border-border bg-card flex items-center justify-center font-extrabold text-primary text-sm">
+                              {selectedPlayerObj.rating || "⭐"}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="font-bold text-sm text-fg">{selectedPlayerObj.name}</div>
+                            <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5">
+                              {selectedPlayerObj.rating && (
+                                <span className="font-semibold text-primary">التقييم: {selectedPlayerObj.rating}</span>
+                              )}
+                              {selectedPlayerObj.style && (
+                                <span>• النوع: {selectedPlayerObj.style}</span>
+                              )}
+                              {selectedPlayerObj.position && (
+                                <span>• المركز: {selectedPlayerObj.position}</span>
+                              )}
+                            </div>
+                          </div>
+                          <Check className="size-5 text-ok shrink-0" />
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -624,6 +778,37 @@ function OrderPage() {
                     <span className="font-mono text-fg" dir="ltr">
                       {whatsapp}
                     </span>
+                  </div>
+                )}
+                {/* Fallback service fields review */}
+                {selectedService?.type === "division_boost" && (
+                  <>
+                    <div className="flex justify-between border-b border-border/80 pb-2">
+                      <span className="text-muted">الديفيجن الحالي:</span>
+                      <span className="font-semibold text-fg">{fallbackDivision}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/80 pb-2">
+                      <span className="text-muted">النقاط الحالية:</span>
+                      <span className="font-semibold text-fg">{fallbackPoints}</span>
+                    </div>
+                    {fallbackRanking && (
+                      <div className="flex justify-between border-b border-border/80 pb-2">
+                        <span className="text-muted">الترتيب العالمي:</span>
+                        <span className="font-semibold text-fg">{fallbackRanking}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+                {selectedService?.type === "player_guarantee" && fallbackPlayerName && (
+                  <div className="flex justify-between border-b border-border/80 pb-2">
+                    <span className="text-muted">اللاعب المطلوب:</span>
+                    <span className="font-bold text-primary">{fallbackPlayerName}</span>
+                  </div>
+                )}
+                {fallbackNotes && (
+                  <div className="flex justify-between border-b border-border/80 pb-2">
+                    <span className="text-muted">ملاحظات:</span>
+                    <span className="font-semibold text-fg max-w-[200px] truncate">{fallbackNotes}</span>
                   </div>
                 )}
                 {Object.entries(dynamicAnswers || {}).map(([k, v]) => (

@@ -60,13 +60,17 @@ function AdminContactPage() {
       const cleanTg = telegram.replace("@", "").trim();
       const cleanWa = whatsapp.replace(/[^0-9]/g, "").trim();
 
-      const data: ContactSettingsDoc = {
+      const data: Record<string, any> = {
         whatsappNumber: cleanWa,
         telegramUsername: cleanTg,
-        telegramBotUsername: botUsername.replace("@", "").trim() || undefined,
-        supportHours: supportHours.trim(),
+        supportHours: supportHours.trim() || "يومياً 10 صباحاً — 2 فجراً",
         updatedAt: new Date().toISOString(),
       };
+
+      const cleanBot = botUsername.replace("@", "").trim();
+      if (cleanBot) {
+        data.telegramBotUsername = cleanBot;
+      }
 
       await setDoc(doc(db, "settings", "contact"), data);
       await logActivity({
@@ -78,9 +82,10 @@ function AdminContactPage() {
       });
 
       setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 3000);
+      setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
-      console.error(err);
+      console.error("Save contact settings failed:", err);
+      alert("حدث خطأ أثناء الحفظ: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setSaving(false);
     }

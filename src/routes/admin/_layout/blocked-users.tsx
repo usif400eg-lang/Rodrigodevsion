@@ -59,14 +59,14 @@ function AdminBlockedUsersPage() {
 
     try {
       const ref = doc(collection(db, "blockedUsers"));
-      const newBlocked: BlockedUserDoc = {
+      const newBlocked: Record<string, any> = {
         id: ref.id,
-        telegram: telegram.trim() || undefined,
-        whatsapp: whatsapp.trim() || undefined,
         reason: reason.trim() || "حظر يدوي",
         blockedBy: session.admin.displayName,
         blockedAt: new Date().toISOString(),
       };
+      if (telegram.trim()) newBlocked.telegram = telegram.trim();
+      if (whatsapp.trim()) newBlocked.whatsapp = whatsapp.trim();
 
       await setDoc(ref, newBlocked);
       await logActivity({

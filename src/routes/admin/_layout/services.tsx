@@ -130,25 +130,26 @@ function AdminServicesPage() {
       const now = new Date().toISOString();
       const serviceId = editingService ? editingService.id : doc(collection(db, "services")).id;
 
-      const svcData: ServiceDoc = {
+      const svcData: Record<string, any> = {
         id: serviceId,
         name: name.trim(),
         slug: slug.trim() || name.toLowerCase().replace(/\s+/g, "-"),
         description: description.trim(),
         price: Number(price),
-        oldPrice: oldPrice ? Number(oldPrice) : undefined,
         currency: currency.trim(),
         estimatedTime: estimatedTime.trim(),
-        badge: badge.trim() || undefined,
         type,
         images: images.length > 0 ? images : ["/badges/div-1.svg"],
-        formId: formId || undefined,
         active: editingService ? editingService.active : true,
         featured,
         sortOrder: Number(sortOrder),
         createdAt: editingService ? editingService.createdAt : now,
         updatedAt: now,
       };
+
+      if (oldPrice) svcData.oldPrice = Number(oldPrice);
+      if (badge.trim()) svcData.badge = badge.trim();
+      if (formId) svcData.formId = formId;
 
       await setDoc(doc(db, "services", serviceId), svcData);
 

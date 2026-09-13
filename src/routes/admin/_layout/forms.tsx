@@ -99,13 +99,13 @@ function AdminFormsPage() {
     if (!session) return;
     try {
       const ref = doc(collection(db, "forms"));
-      const newForm: FormDoc = {
+      const newForm: Record<string, any> = {
         id: ref.id,
         name: formName.trim(),
-        description: formDesc.trim() || undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+      if (formDesc.trim()) newForm.description = formDesc.trim();
       await setDoc(ref, newForm);
       await logActivity({
         adminUid: session.admin.uid,
@@ -158,17 +158,17 @@ function AdminFormsPage() {
             .filter(Boolean)
         : undefined;
 
-      const qDoc: QuestionDoc = {
+      const qDoc: Record<string, any> = {
         id: qId,
         formId: selectedFormId,
         type: qType,
         label: qLabel.trim(),
-        placeholder: qPlaceholder.trim() || undefined,
         required: qRequired,
         options: opts,
         sortOrder: Number(qSortOrder),
         active: editingQuestion ? editingQuestion.active : true,
       };
+      if (qPlaceholder.trim()) qDoc.placeholder = qPlaceholder.trim();
 
       await setDoc(doc(db, "questions", qId), qDoc);
       await logActivity({
