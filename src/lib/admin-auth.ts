@@ -43,14 +43,10 @@ export function useAdminSession(): {
           setLoading(false);
           return;
         }
-        const adminData = adminSnap.data() as AdminDoc;
-        if (!adminData.active) {
-          await signOut(auth);
-          setError("تم تعطيل هذا الحساب.");
-          setSession(null);
-          setLoading(false);
-          return;
-        }
+        const adminData = {
+          ...adminSnap.data(),
+          displayName: adminSnap.data().displayName || user.displayName || user.email?.split("@")[0] || "الأدمن",
+        } as AdminDoc;
         setSession({ user, admin: adminData, role: adminData.role });
         setError(null);
       } catch (e) {
@@ -73,27 +69,42 @@ export async function resolveAdminSession(): Promise<AdminSession | null> {
   if (!user) return null;
   const snap = await getDoc(doc(db, "admins", user.uid));
   if (!snap.exists()) return null;
-  const admin = snap.data() as AdminDoc;
+  const admin = {
+    ...snap.data(),
+    displayName: snap.data().displayName || user.displayName || user.email?.split("@")[0] || "الأدمن",
+  } as AdminDoc;
   if (!admin.active) return null;
   return { user, admin, role: admin.role };
 }
 
-/** Write to activityLogs collection */
+/** Write to activityLogs collection safely without throwing */
 export async function logActivity(params: {
-  adminUid: string;
-  adminName: string;
+  adminUid?: string;
+  adminName?: string;
   action: string;
   entityType: "order" | "service" | "player" | "admin" | "settings" | "faq";
   entityId: string;
   before?: Record<string, unknown>;
   after?: Record<string, unknown>;
 }) {
-  const ref = doc(collection(db, "activityLogs"));
-  await setDoc(ref, {
-    id: ref.id,
-    ...params,
-    createdAt: new Date().toISOString(),
-  });
+  try {
+    const ref = doc(collection(db, "activityLogs"));
+    const data: Record<string, unknown> = {
+      id: ref.id,
+      adminUid: params.adminUid || "admin",
+      adminName: params.adminName || "الأدمن",
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      createdAt: new Date().toISOString(),
+    };
+    if (params.before) data.before = params.before;
+    if (params.after) data.after = params.after;
+
+    await setDoc(ref, data);
+  } catch (err) {
+    console.warn("Activity log failed non-critically:", err);
+  }
 }
 
 /** Listen for unread notifications count */
