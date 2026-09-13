@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function adminDoc() {
+      return get(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function adminRole() {
+      return adminDoc().data.role;
+    }
+
+    function isOwner() {
+      return isAdmin() && adminRole() == 'OWNER';
+    }
+
+    function isAtLeastAdmin() {
+      return isAdmin() && adminRole() in ['OWNER', 'ADMIN'];
+    }
+
+    function isAtLeastStaff() {
+      return isAdmin() && adminRole() in ['OWNER', 'ADMIN', 'STAFF'];
+    }
+
+    // ── Public catalog ──────────────────────────────────────────────────────
+    match /services/{id} {
+      allow read: if true;
+      allow create, update: if isAtLeastAdmin();
+      allow delete: if isOwner();
+    }
+
+    match /players/{id} {
+      allow read: if true;
+      allow create, update: if isAtLeastAdmin();
+      allow delete: if isOwner();
+    }
+
+    match /faq/{id} {
+      allow read: if true;
+      allow create, update: if isAtLeastAdmin();
+      allow delete: if isOwner();
+    }
+
+    match /forms/{id} {
+      allow read: if true;
+      allow write: if isAtLeastAdmin();
+    }
+
+    match /questions/{id} {
+      allow read: if true;
+      allow write: if isAtLeastAdmin();
+    }
+
+    // ── Settings ────────────────────────────────────────────────────────────
+    match /settings/orderCounter {
+      allow read, write: if true;
+    }
+
+    match /settings/{docId} {
+      // Public can read site/contact/appearance/seo/boosterIcons settings
+      allow read: if docId in ['site', 'contact', 'appearance', 'seo', 'orderCounter', 'boosterIcons'] || isAdmin();
+      allow write: if isAtLeastAdmin();
+    }
+
+    // ── Media Library ───────────────────────────────────────────────────────
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isAtLeastAdmin();
+    }
+
+    // ── Orders ──────────────────────────────────────────────────────────────
+    match /orders/{orderId} {
+      // Public can create orders with ONLY allowed fields
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'orderId', 'serviceId', 'serviceName', 'price', 'currency',
+          'customerName', 'telegram', 'whatsapp', 'answers',
+          'status', 'paymentStatus', 'createdAt', 'updatedAt', 'sessionId'
+        ])
+        && request.resource.data.status == 'NEW'
+        && request.resource.data.paymentStatus == 'UNPAID'
+        && request.resource.data.customerName is string
+        && request.resource.data.customerName.size() > 0
+        && request.resource.data.telegram is string
+        && request.resource.data.telegram.size() > 0;
+
+      // Public can read (app must NOT display admin-only fields: internalNotes, assignedAdmin)
+      allow read: if true;
+
+      // Only admins can update/delete
+      allow update: if isAtLeastStaff();
+      allow delete: if isOwner();
+    }
+
+    // ── Order Messages ──────────────────────────────────────────────────────
+    match /orderMessages/{id} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly(['id','orderId','author','authorName','message','createdAt'])
+        && request.resource.data.author in ['customer', 'admin']
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() < 2000;
+      allow update, delete: if isAtLeastAdmin();
+    }
+
+    // ── Admin-only collections ──────────────────────────────────────────────
+    match /admins/{uid} {
+      // Admins can read their own doc; OWNER can read/write all
+      allow read: if isSignedIn() && (request.auth.uid == uid || isOwner());
+      allow create, update: if isOwner();
+      allow delete: if isOwner();
+    }
+
+    match /customers/{id} {
+      allow read, write: if isAtLeastAdmin();
+    }
+
+    match /blockedUsers/{id} {
+      allow read, write: if isAtLeastAdmin();
+    }
+
+    match /activityLogs/{id} {
+      allow read: if isAtLeastAdmin();
+      allow create: if isAtLeastStaff();
+      allow update, delete: if isOwner();
+    }
+
+    match /notifications/{id} {
+      allow read, write: if isAtLeastAdmin();
+    }
+
+    match /coupons/{id} {
+      allow read: if isAtLeastAdmin();
+      allow write: if isAtLeastAdmin();
+    }
+
+    match /dashboardStats/{id} {
+      allow read, write: if isAtLeastAdmin();
+    }
+  }
+}
