@@ -92,7 +92,7 @@ function BoosterIconsSection() {
       }
     } catch (err) {
       console.error("Upload failed:", err);
-      alert("فشل رفع الصورة. تأكد من صلاحيات Firebase Storage.");
+      alert("حدث خطأ أثناء حفظ الصورة، يرجى المحاولة مرة أخرى.");
     } finally {
       setUploading(null);
     }

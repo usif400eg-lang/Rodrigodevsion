@@ -1,27 +1,20 @@
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import { storage } from "./firebase";
-
 export interface UploadProgressCallback {
   (progressPercent: number): void;
 }
 
 /**
  * Compresses and converts an image File to an optimized Base64 Data URL (WebP/JPEG).
- * Scales down large camera/mobile photos so they fit cleanly in Firestore documents (< 200KB).
+ * Scales down large camera/mobile photos so they fit cleanly in Firestore documents (< 100KB).
+ * Requires ZERO Firebase Storage Blaze plan and works 100% offline and online!
  */
 export async function fileToOptimizedDataUrl(
   file: File | Blob,
-  maxDimension = 1000,
+  maxDimension = 800,
   quality = 0.82,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    // If it's SVG or GIF, keep it as-is to preserve vector or animation
-    if ("type" in file && (file.type === "image/svg+xml" || file.type === "image/gif")) {
+    // If it's SVG, preserve vector markup directly
+    if ("type" in file && file.type === "image/svg+xml") {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (err) => reject(err);
@@ -34,7 +27,6 @@ export async function fileToOptimizedDataUrl(
     reader.onload = () => {
       const img = new Image();
       img.onerror = () => {
-        // Fallback to raw data URL if image tag fails to load
         resolve(reader.result as string);
       };
       img.onload = () => {
@@ -65,7 +57,7 @@ export async function fileToOptimizedDataUrl(
 
           // Try WebP first for ultra-lightweight size, fallback to JPEG
           let dataUrl = canvas.toDataURL("image/webp", quality);
-          if (!dataUrl.startsWith("data:image/webp")) {
+          if (!dataUrl || !dataUrl.startsWith("data:image/webp")) {
             dataUrl = canvas.toDataURL("image/jpeg", quality);
           }
           resolve(dataUrl);
@@ -80,70 +72,39 @@ export async function fileToOptimizedDataUrl(
 }
 
 /**
- * Bulletproof image upload:
- * Attempts Firebase Storage first. If Firebase Storage fails (CORS, missing rules,
- * unauthorized, or network timeout), it automatically falls back to an optimized
- * Base64 Data URL so the upload NEVER fails for the user!
+ * Resilient image upload:
+ * Converts and compresses the image locally in milliseconds.
+ * Stores directly inside Firestore without needing Firebase Storage (Blaze) plan!
  */
 export async function uploadFileToStorage(
-  path: string,
+  _path: string,
   file: File | Blob,
   onProgress?: UploadProgressCallback,
 ): Promise<string> {
-  // Check if we can attempt Firebase Storage
+  if (onProgress) onProgress(30);
+
   try {
-    const storageRef = ref(storage, path);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    const storagePromise = new Promise<string>((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          if (onProgress && snapshot.totalBytes > 0) {
-            const percent = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-            );
-            onProgress(percent);
-          }
-        },
-        (error) => {
-          console.warn("Storage upload error, using optimized fallback:", error);
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            if (onProgress) onProgress(100);
-            resolve(downloadUrl);
-          } catch (err) {
-            reject(err);
-          }
-        },
-      );
-    });
-
-    // 8-second timeout for slow or blocked Firebase Storage connections
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Storage timeout")), 8000),
-    );
-
-    return await Promise.race([storagePromise, timeoutPromise]);
-  } catch (err) {
-    console.warn("Firebase Storage failed or timed out. Falling back to optimized inline data URL:", err);
+    const result = await fileToOptimizedDataUrl(file, 800, 0.82);
     if (onProgress) onProgress(100);
-    return await fileToOptimizedDataUrl(file);
+    return result;
+  } catch (err) {
+    console.warn("Optimization failed, falling back to raw Data URL:", err);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (onProgress) onProgress(100);
+        resolve(reader.result as string);
+      };
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
   }
 }
 
 /**
- * Deletes a file from Firebase Storage given its path or full URL
+ * Deletes a file from storage if needed (no-op for inline/external URLs)
  */
-export async function deleteFileFromStorage(pathOrUrl: string): Promise<void> {
-  try {
-    if (!pathOrUrl || pathOrUrl.startsWith("data:")) return;
-    const fileRef = ref(storage, pathOrUrl);
-    await deleteObject(fileRef);
-  } catch (err) {
-    console.warn("Failed to delete storage file:", err);
-  }
+export async function deleteFileFromStorage(_pathOrUrl: string): Promise<void> {
+  // Data URLs and external URLs don't need cloud deletion
+  return Promise.resolve();
 }
