@@ -27,6 +27,7 @@ import {
 } from "firebase/storage";
 import { useEffect, useRef, useState } from "react";
 import { db, storage } from "@/lib/firebase";
+import { uploadFileToStorage } from "@/lib/firebase-storage";
 import { seedFirestoreIfEmpty } from "@/lib/firebase-seed";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
@@ -78,9 +79,7 @@ function BoosterIconsSection() {
     setUploading(index);
     try {
       const path = `booster-icons/skill_${index}_${Date.now()}.${file.name.split(".").pop()}`;
-      const sRef = storageRef(storage, path);
-      await uploadBytes(sRef, file);
-      const url = await getDownloadURL(sRef);
+      const url = await uploadFileToStorage(path, file);
       await saveBoosterIcon(index, url);
       if (session) {
         await logActivity({
@@ -135,9 +134,7 @@ function BoosterIconsSection() {
     setUploadingExtra(true);
     try {
       const path = `booster-icons/extra_${Date.now()}.${file.name.split(".").pop()}`;
-      const sRef = storageRef(storage, path);
-      await uploadBytes(sRef, file);
-      const url = await getDownloadURL(sRef);
+      const url = await uploadFileToStorage(path, file);
       setNewUrl(url);
     } catch (err) {
       console.error("Extra icon upload failed:", err);

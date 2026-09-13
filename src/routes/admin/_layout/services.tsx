@@ -4,6 +4,7 @@ import {
   Edit2,
   Eye,
   EyeOff,
+  Link as LinkIcon,
   Package,
   Plus,
   Star,
@@ -56,6 +57,7 @@ function AdminServicesPage() {
   const [type, setType] = useState<"division_boost" | "player_guarantee">("division_boost");
   const [formId, setFormId] = useState("");
   const [images, setImages] = useState<string[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   const [featured, setFeatured] = useState(false);
   const [sortOrder, setSortOrder] = useState(1);
 
@@ -95,6 +97,7 @@ function AdminServicesPage() {
     setType("division_boost");
     setFormId("");
     setImages(["/badges/div-1.svg"]);
+    setImageUrlInput("");
     setFeatured(false);
     setSortOrder(services.length + 1);
     setIsModalOpen(true);
@@ -113,6 +116,7 @@ function AdminServicesPage() {
     setType(svc.type);
     setFormId(svc.formId || "");
     setImages(svc.images || []);
+    setImageUrlInput("");
     setFeatured(svc.featured);
     setSortOrder(svc.sortOrder);
     setIsModalOpen(true);
@@ -229,6 +233,13 @@ function AdminServicesPage() {
     }
   }
 
+  function handleAddImageUrl() {
+    const trimmed = imageUrlInput.trim();
+    if (!trimmed) return;
+    setImages((prev) => [...prev, trimmed]);
+    setImageUrlInput("");
+  }
+
   async function handleUploadImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -240,6 +251,7 @@ function AdminServicesPage() {
       setImages((prev) => [...prev, url]);
     } catch (err) {
       console.error("Image upload failed:", err);
+      alert("تعذر رفع الصورة، يمكنك استخدام رابط الصورة المباشر.");
     } finally {
       setUploadingImage(false);
       e.target.value = "";
@@ -310,11 +322,20 @@ function AdminServicesPage() {
                   </div>
                 </div>
 
-                {/* Title & Description */}
-                <h3 className="text-base font-extrabold text-fg">{svc.name}</h3>
-                <p className="mt-1 text-xs text-muted leading-relaxed min-h-8 line-clamp-2">
-                  {svc.description}
-                </p>
+                {/* Title & Description with image thumbnail */}
+                <div className="flex items-start gap-3">
+                  {svc.images?.[0] && (
+                    <div className="size-11 rounded-xl border border-border bg-surface p-1.5 flex items-center justify-center flex-shrink-0 overflow-hidden shadow-xs">
+                      <img src={svc.images[0]} alt="" className="size-full object-contain" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-extrabold text-fg">{svc.name}</h3>
+                    <p className="mt-1 text-xs text-muted leading-relaxed min-h-8 line-clamp-2">
+                      {svc.description}
+                    </p>
+                  </div>
+                </div>
 
                 {/* Price & Duration */}
                 <div className="mt-4 flex items-center justify-between rounded-xl bg-surface p-3 text-xs">
@@ -533,25 +554,32 @@ function AdminServicesPage() {
                 </div>
               </div>
 
-              {/* Images list & upload */}
-              <div>
-                <label className="mb-1 block font-bold text-fg">أيقونات / صور الخدمة</label>
-                <div className="flex flex-wrap items-center gap-2 mb-2">
+              {/* Images list & upload / URL input */}
+              <div className="space-y-2.5 rounded-2xl border border-border bg-surface/50 p-3.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-fg">أيقونات / صور الخدمة</label>
+                  <span className="text-[10px] text-muted">يمكنك إضافة أكثر من صورة/بادج</span>
+                </div>
+
+                {/* Images list preview */}
+                <div className="flex flex-wrap items-center gap-2">
                   {images.map((src, i) => (
-                    <div key={src + i} className="relative size-12 rounded-lg border border-border p-1 bg-surface">
-                      <img src={src} alt="" className="size-full object-contain" />
+                    <div key={src + i} className="relative size-14 rounded-xl border border-border p-1.5 bg-card shadow-xs">
+                      <img src={src} alt="" className="size-full object-contain rounded-lg" />
                       <button
                         type="button"
                         onClick={() => setImages((prev) => prev.filter((_, idx) => idx !== i))}
-                        className="absolute -top-1.5 -right-1.5 rounded-full bg-red-600 text-white size-4 flex items-center justify-center text-[9px]"
+                        className="absolute -top-1.5 -right-1.5 rounded-full bg-red-600 text-white size-5 flex items-center justify-center text-[10px] font-bold shadow hover:bg-red-700 transition"
+                        title="حذف الصورة"
                       >
                         ×
                       </button>
                     </div>
                   ))}
-                  <label className="size-12 rounded-lg border border-dashed border-border flex flex-col items-center justify-center cursor-pointer text-muted hover:border-primary">
+
+                  <label className="size-14 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5 flex flex-col items-center justify-center cursor-pointer text-primary hover:bg-primary/10 transition">
                     <Upload className="size-4" />
-                    <span className="text-[9px] mt-0.5">{uploadingImage ? "..." : "رفع"}</span>
+                    <span className="text-[9px] font-bold mt-1">{uploadingImage ? "..." : "رفع ملف"}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -560,6 +588,55 @@ function AdminServicesPage() {
                       className="hidden"
                     />
                   </label>
+                </div>
+
+                {/* Direct Image URL input */}
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="relative flex-1">
+                    <input
+                      type="url"
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddImageUrl();
+                        }
+                      }}
+                      placeholder="أو الصق رابط الصورة المباشر هنا (https://...)"
+                      className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs outline-none focus:border-primary pl-8"
+                      dir="ltr"
+                    />
+                    <LinkIcon className="absolute left-2.5 top-2.5 size-3.5 text-muted pointer-events-none" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAddImageUrl}
+                    disabled={!imageUrlInput.trim()}
+                    className="rounded-xl bg-primary px-3.5 py-2 font-bold text-white text-xs hover:bg-primary/90 transition disabled:opacity-40 whitespace-nowrap"
+                  >
+                    + إضافة الرابط
+                  </button>
+                </div>
+
+                {/* Quick default badges suggestions */}
+                <div className="flex items-center gap-1.5 pt-1 text-[10px] text-muted flex-wrap">
+                  <span>بادجات جاهزة سريعة:</span>
+                  {[
+                    { label: "Div 1", path: "/badges/div-1.svg" },
+                    { label: "Div 2", path: "/badges/div-2.svg" },
+                    { label: "Div 3", path: "/badges/div-3.svg" },
+                    { label: "لاعب إيبك", path: "/badges/player-epic.svg" },
+                  ].map((b) => (
+                    <button
+                      key={b.path}
+                      type="button"
+                      onClick={() => setImages((prev) => [...prev, b.path])}
+                      className="rounded-lg bg-card border border-border px-2 py-0.5 font-semibold text-fg hover:border-primary hover:text-primary transition"
+                    >
+                      {b.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
