@@ -9,13 +9,13 @@ import { SERVICES } from "@/lib/catalog";
 
 function ServiceSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col justify-between rounded-3xl border border-primary/20 bg-[#140a28] p-6 min-h-[500px]">
-      <div className="mb-4 h-44 rounded-2xl bg-white/5" />
-      <div className="space-y-3">
-        <div className="mx-auto h-6 w-3/4 rounded-lg bg-white/10" />
-        <div className="mx-auto h-12 w-full rounded-lg bg-white/5" />
-        <div className="h-14 rounded-2xl bg-white/10" />
-        <div className="h-12 rounded-2xl bg-white/15" />
+    <div className="flex animate-pulse flex-col justify-between rounded-3xl border border-border bg-white p-0 overflow-hidden min-h-[490px] shadow-sm">
+      <div className="h-52 w-full bg-surface" />
+      <div className="p-6 space-y-3">
+        <div className="mx-auto h-6 w-3/4 rounded-lg bg-surface" />
+        <div className="mx-auto h-12 w-full rounded-lg bg-surface" />
+        <div className="h-14 rounded-2xl bg-surface" />
+        <div className="h-12 rounded-2xl bg-surface" />
       </div>
     </div>
   );
@@ -89,7 +89,7 @@ export function ServicesBoard() {
     <section id="services" className="scroll-mt-16 bg-surface px-3 py-12 md:px-6">
       <div className="mx-auto max-w-6xl">
         {/* Search */}
-        <div className="mx-auto mb-5 flex max-w-xl items-center gap-3 rounded-full border border-border bg-bg px-4 py-2">
+        <div className="mx-auto mb-5 flex max-w-xl items-center gap-3 rounded-full border border-border bg-bg px-4 py-2 shadow-xs">
           <Search className="size-5 shrink-0 text-muted" />
           <input
             value={q}
@@ -114,22 +114,22 @@ export function ServicesBoard() {
         <div className="mb-5 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/upgrades"
-            className="inline-flex min-h-11 items-center rounded-full border-2 border-primary px-7 text-sm font-extrabold text-primary"
+            className="inline-flex min-h-11 items-center rounded-full border-2 border-primary px-7 text-sm font-extrabold text-primary hover:bg-primary/5 transition"
           >
             تطويرات اللاعبين
           </Link>
-          <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-7 text-sm font-extrabold text-on-primary">
+          <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-7 text-sm font-extrabold text-on-primary shadow-sm">
             الخدمات
           </span>
         </div>
 
-        <p className="mx-auto mb-8 max-w-2xl text-center text-sm font-bold leading-relaxed md:text-base">
+        <p className="mx-auto mb-8 max-w-2xl text-center text-sm font-bold leading-relaxed text-muted md:text-base">
           كل ما يخص الوصول للديفيجن الأول والتصنيف وضمان اللاعبين في أسرع وقت
           وتطويرات خاصة للاعبين
         </p>
 
         {/* Grid */}
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-3">
           {loading ? (
             <>
               <ServiceSkeleton />
@@ -144,97 +144,85 @@ export function ServicesBoard() {
             filtered.map((s) => (
               <article
                 key={s.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-primary/25 bg-[#120826] shadow-xl transition-all duration-300 hover:-translate-y-2 hover:border-primary/60 hover:shadow-2xl hover:shadow-primary/25 p-6 text-white min-h-[500px]"
+                className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-primary/50 p-0 text-slate-900 min-h-[500px]"
               >
-                {/* ── Ambient Background Glow & Gradient Reflection ── */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  {/* Blurred ambient backdrop from the service image */}
-                  {s.images?.[0] && (
+                {/* ── Full Width Image Header (Edge-to-Edge) ── */}
+                <div className="relative w-full h-52 sm:h-60 overflow-hidden bg-white flex items-center justify-center">
+                  <img
+                    src={s.images?.[0] || "/badges/div-1.svg"}
+                    alt={s.name}
+                    className="size-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {/* Downward reflection & subtle fade into the white card */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-white/40 pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+
+                  {/* Floating Badges */}
+                  <div className="absolute top-3.5 inset-x-3.5 z-10 flex items-center justify-between pointer-events-none">
+                    {s.badge ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-1 text-xs font-black text-white shadow-lg shadow-orange-500/25">
+                        <span>⭐</span>
+                        <span>{s.badge}</span>
+                      </span>
+                    ) : (
+                      <span />
+                    )}
+                    <span className="rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-black text-white backdrop-blur-md shadow-sm">
+                      {s.type === "division_boost" ? "رفع ديفيجن" : "ضمان لاعب"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mirror reflection fading down seamlessly into white */}
+                {s.images?.[0] && (
+                  <div className="relative -mt-5 h-12 w-full flex items-center justify-center overflow-hidden pointer-events-none opacity-25">
                     <img
                       src={s.images[0]}
                       alt=""
-                      className="absolute inset-0 size-full object-cover blur-2xl scale-125 opacity-30 group-hover:opacity-45 transition-all duration-700"
+                      className="size-full object-cover scale-y-[-1] blur-[1.5px]"
                     />
-                  )}
-                  {/* Professional downward reflection & gradient flowing through the entire card */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-[#1c0a38]/70 via-[#120626]/85 to-[#0b0318]" />
-                  {/* Diagonal glossy sheen */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10" />
-                  {/* Top reflection light flare */}
-                  <div className="absolute -top-24 -right-24 size-64 rounded-full bg-primary/20 blur-3xl" />
-                </div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white" />
+                  </div>
+                )}
 
-                {/* ── Top Header: Badges ── */}
-                <div className="relative z-10 flex items-center justify-between gap-2 mb-2">
-                  {s.badge ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-1 text-xs font-bold text-white shadow-lg border border-white/20 backdrop-blur-md">
-                      <span>{s.badge}</span>
-                    </span>
-                  ) : (
-                    <span />
-                  )}
-                  <span className="rounded-full bg-black/45 px-3 py-1 text-[11px] font-bold text-purple-200 border border-white/10 backdrop-blur-md">
-                    {s.type === "division_boost" ? "رفع ديفيجن" : "ضمان لاعب"}
-                  </span>
-                </div>
-
-                {/* ── Large Full Showcase Image with Downward Reflection ── */}
-                <div className="relative z-10 my-2 flex flex-col items-center justify-center">
-                  <div className="relative flex h-44 w-full items-center justify-center">
-                    <img
-                      src={s.images?.[0] || "/badges/div-1.svg"}
-                      alt={s.name}
-                      className="max-h-40 max-w-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)] group-hover:scale-105 transition-transform duration-500"
-                    />
+                {/* ── Card Content Body ── */}
+                <div className="p-6 pt-2 flex flex-col flex-1 justify-between text-center">
+                  <div>
+                    <h3 className="mb-2 text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {s.name}
+                    </h3>
+                    <p className="mb-6 text-xs font-medium text-slate-500 leading-relaxed line-clamp-3 px-1 min-h-12">
+                      {s.description}
+                    </p>
                   </div>
 
-                  {/* Mirror Reflection fading down into the card */}
-                  {s.images?.[0] && (
-                    <div className="relative -mt-4 h-14 w-full flex items-center justify-center overflow-hidden pointer-events-none opacity-30">
-                      <img
-                        src={s.images[0]}
-                        alt=""
-                        className="max-h-40 max-w-full object-contain scale-y-[-1] blur-[1px]"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#120626]/75 to-[#120626]" />
+                  <div className="mt-auto">
+                    {/* Price and Duration Box */}
+                    <div className="mb-5 flex items-center justify-between rounded-2xl bg-surface border border-border/80 px-4 py-3">
+                      <div className="flex items-baseline gap-1.5 font-extrabold">
+                        <span className="text-2xl text-primary font-black">{s.price}</span>
+                        <span className="text-xs text-muted font-semibold">{s.currency}</span>
+                        {s.oldPrice ? (
+                          <span className="mr-1 text-xs text-muted line-through">
+                            {s.oldPrice}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-muted font-medium">
+                        <Clock className="size-3.5 text-muted" />
+                        <span>{s.estimatedTime}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
 
-                {/* ── Text on the Card (Title, Description, Price, CTA) ── */}
-                <div className="relative z-10 text-center flex flex-col flex-1 justify-end pt-3">
-                  <h3 className="mb-2 text-2xl font-black text-white drop-shadow-md tracking-tight">
-                    {s.name}
-                  </h3>
-                  <p className="mb-5 text-xs font-medium text-purple-100/80 leading-relaxed line-clamp-3 px-1 min-h-12">
-                    {s.description}
-                  </p>
-
-                  {/* Price and Duration Box */}
-                  <div className="mb-5 flex items-center justify-between rounded-2xl bg-white/10 border border-white/15 px-4 py-3 backdrop-blur-md shadow-inner">
-                    <div className="flex items-baseline gap-1.5 font-extrabold text-white">
-                      <span className="text-2xl text-purple-300 font-black">{s.price}</span>
-                      <span className="text-xs text-purple-200/80 font-semibold">{s.currency}</span>
-                      {s.oldPrice ? (
-                        <span className="mr-1 text-xs text-purple-300/60 line-through">
-                          {s.oldPrice}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs text-purple-200 font-medium">
-                      <Clock className="size-3.5 text-purple-300" />
-                      <span>{s.estimatedTime}</span>
-                    </div>
+                    {/* Order CTA Button */}
+                    <Link
+                      to="/order"
+                      search={{ service: s.id }}
+                      className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-2xl text-base font-extrabold shadow-md hover:shadow-primary/30 transition-all hover:scale-[1.01]"
+                    >
+                      أطلب الآن
+                    </Link>
                   </div>
-
-                  {/* Order CTA Button */}
-                  <Link
-                    to="/order"
-                    search={{ service: s.id }}
-                    className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-2xl text-base font-extrabold shadow-lg hover:shadow-primary/50 transition-all hover:scale-[1.02]"
-                  >
-                    أطلب الآن
-                  </Link>
                 </div>
               </article>
             ))
