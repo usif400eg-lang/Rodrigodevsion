@@ -195,30 +195,35 @@ function ServicesCatalogPage() {
               {filtered.map((s) => (
                 <article
                   key={s.id}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-primary/50 p-0 text-slate-900 min-h-[480px]"
+                  className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[30px] border border-slate-200/90 bg-white shadow-md hover:shadow-2xl hover:border-primary/50 p-0 text-slate-900 min-h-[480px]"
                 >
                   {/* Full Width Image */}
                   <div className="relative w-full h-52 overflow-hidden bg-white flex items-center justify-center">
                     <img
                       src={s.images?.[0] || "/badges/div-1.svg"}
                       alt={s.name}
-                      className="size-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                      className="size-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-white/40 pointer-events-none" />
                     <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
 
-                    {/* Badges */}
+                    {/* Floating 3D Badges */}
                     <div className="absolute top-3.5 inset-x-3.5 z-10 flex items-center justify-between pointer-events-none">
                       {s.badge ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-1 text-xs font-black text-white shadow-lg shadow-orange-500/25">
-                          <span>⭐</span>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-1 text-xs font-black text-white shadow-lg shadow-orange-500/30">
+                          <img src="/3d/crown-3d.jpg" alt="" className="size-4 rounded-full object-cover" />
                           <span>{s.badge}</span>
                         </span>
                       ) : (
                         <span />
                       )}
-                      <span className="rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-black text-white backdrop-blur-md shadow-sm">
-                        {s.type === "division_boost" ? "رفع ديفيجن" : "ضمان لاعب"}
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/85 px-3 py-1 text-[11px] font-black text-white backdrop-blur-md shadow-md border border-white/10">
+                        <img
+                          src={s.type === "division_boost" ? "/3d/trophy-3d.jpg" : "/3d/crown-3d.jpg"}
+                          alt=""
+                          className="size-3.5 rounded-full object-cover"
+                        />
+                        <span>{s.type === "division_boost" ? "رفع ديفيجن" : "ضمان لاعب"}</span>
                       </span>
                     </div>
                   </div>

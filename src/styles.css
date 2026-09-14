@@ -108,6 +108,54 @@
   .card-highlight {
     background: linear-gradient(145deg, #991b1b, #eab308, #7f1d1d);
   }
+
+  /* 3D Depth & Futuristic Gaming Utilities */
+  .card-3d {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+  }
+  .card-3d:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 25px rgba(124, 58, 237, 0.12);
+  }
+
+  .float-3d {
+    animation: float3d 5s ease-in-out infinite;
+  }
+
+  .float-3d-delayed {
+    animation: float3d 6s ease-in-out 1.5s infinite;
+  }
+
+  @keyframes float3d {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-8px) rotate(1.2deg);
+    }
+  }
+
+  .glow-3d-gold {
+    box-shadow: 0 0 35px -5px rgba(245, 158, 11, 0.35);
+  }
+
+  .glow-3d-purple {
+    box-shadow: 0 0 35px -5px rgba(124, 58, 237, 0.35);
+  }
+
+  .glow-3d-cyan {
+    box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.35);
+  }
+
+  .glass-3d {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

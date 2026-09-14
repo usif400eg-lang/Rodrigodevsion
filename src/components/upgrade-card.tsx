@@ -15,7 +15,7 @@ export function UpgradeCard({ player }: { player: PlayerDoc }) {
 
   return (
     <article className="flex flex-col items-center w-full">
-      <Link to="/order" search={{ service: "player" }} className="block w-full max-w-52 sm:max-w-56 transition-transform duration-300 hover:scale-[1.03]">
+      <Link to="/order" search={{ service: "player" }} className="card-3d block w-full max-w-52 sm:max-w-56 transition-transform duration-300">
         {/* ── Card shell ── */}
         <div
           className={`relative aspect-[3/4] overflow-hidden rounded-2xl shadow-xl ${STYLE[player.style] ?? "card-epic"}`}

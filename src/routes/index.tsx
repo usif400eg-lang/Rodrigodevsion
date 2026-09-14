@@ -147,34 +147,62 @@ function Hero({ settings }: { settings: SiteSettingsDoc | null }) {
           </div>
         </div>
 
-        {/* Hero card */}
-        <div className="relative mx-auto w-full max-w-md">
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xl">
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-black text-white shadow-md shadow-primary/25">
-                  D1
+        {/* Hero 3D showcase card */}
+        <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+          {/* Ambient 3D Glow Backing */}
+          <div className="absolute -inset-4 rounded-[40px] bg-gradient-to-tr from-primary/30 via-cyan-500/20 to-amber-500/30 blur-2xl opacity-70 pointer-events-none" />
+
+          <div className="card-3d float-3d relative overflow-hidden rounded-[32px] border border-white/60 bg-white/95 p-3 sm:p-4 shadow-2xl backdrop-blur-xl">
+            {/* 3D Showcase Image */}
+            <div className="relative aspect-square sm:aspect-[4/3] w-full overflow-hidden rounded-[26px] bg-slate-950">
+              <img
+                src="/3d/hero-3d.jpg"
+                alt="eFootball 3D Mobile Showcase"
+                className="size-full object-cover object-center transition-transform duration-700 hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+
+              {/* Top Floating 3D Badge */}
+              <div className="absolute top-3.5 inset-x-3.5 flex items-center justify-between pointer-events-none">
+                <div className="inline-flex items-center gap-2 rounded-2xl bg-black/60 px-3 py-1.5 backdrop-blur-md border border-white/20 shadow-lg">
+                  <img src="/3d/trophy-3d.jpg" alt="Trophy" className="size-6 rounded-full object-cover ring-2 ring-amber-400/80" />
+                  <span className="text-xs font-black text-amber-300">بطولات وديفيجن 1</span>
                 </div>
-                <div>
-                  <div className="font-black text-slate-900">Division Boost</div>
-                  <div className="text-xs font-semibold text-slate-500">من Div 3 → Div 1</div>
+                <span className="rounded-2xl bg-primary/90 px-3 py-1.5 text-xs font-black text-white shadow-md backdrop-blur-md">
+                  eFootball 2026 ⚡
+                </span>
+              </div>
+
+              {/* Bottom 3D Stats Glass Bar */}
+              <div className="absolute bottom-3.5 inset-x-3.5 rounded-2xl bg-slate-950/75 p-3 sm:p-4 backdrop-blur-xl border border-white/15 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2.5">
+                    <img src="/3d/shield-3d.jpg" alt="Shield" className="size-8 rounded-xl object-cover ring-1 ring-cyan-400" />
+                    <div>
+                      <div className="text-sm font-black text-white">حماية وتشفير الحساب</div>
+                      <div className="text-[11px] font-bold text-cyan-300">Konami ID آمن 100% بدون حظر</div>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-black text-emerald-300">
+                    مباشر ومضمون
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-white/10">
+                  <div className="rounded-xl bg-white/5 py-1.5">
+                    <div className="text-sm font-black text-amber-400">99.8%</div>
+                    <div className="text-[10px] text-slate-300 font-medium">معدل الفوز</div>
+                  </div>
+                  <div className="rounded-xl bg-white/5 py-1.5">
+                    <div className="text-sm font-black text-cyan-400">&lt; 4 ساعات</div>
+                    <div className="text-[10px] text-slate-300 font-medium">سرعة البدء</div>
+                  </div>
+                  <div className="rounded-xl bg-white/5 py-1.5">
+                    <div className="text-sm font-black text-purple-400">+5000</div>
+                    <div className="text-[10px] text-slate-300 font-medium">حساب ناجح</div>
+                  </div>
                 </div>
               </div>
-              <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-[11px] font-black text-white shadow-sm">
-                الأكثر طلباً ⭐
-              </span>
-            </div>
-            <div className="mb-4 flex justify-between text-xs font-bold">
-              <span className="text-slate-500">التقدم الفعلي</span>
-              <span className="text-primary font-black">Div 2 • 1680 Rating</span>
-            </div>
-            <div className="mb-5 h-3 overflow-hidden rounded-full bg-slate-100 p-0.5 border border-slate-200/50">
-              <div className="h-full w-[74%] rounded-full bg-gradient-to-r from-primary to-primary-strong shadow-xs" />
-            </div>
-            <div className="grid grid-cols-3 gap-2.5 text-center">
-              <Mini n="+3" l="فوز متتالي" />
-              <Mini n="18س" l="متبقي" />
-              <Mini n="400" l="جنيه" />
             </div>
           </div>
         </div>
@@ -192,31 +220,28 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-function Mini({ n, l }: { n: string; l: string }) {
-  return (
-    <div className="rounded-2xl bg-slate-50 border border-slate-200/70 py-3 px-2">
-      <div className="text-lg font-black text-slate-900">{n}</div>
-      <div className="text-[11px] font-bold text-slate-500 mt-0.5">{l}</div>
-    </div>
-  );
-}
-
 function TrustStrip() {
   const items = [
-    { icon: ShieldCheck, t: "خدمة يدوية آمنة 100%" },
-    { icon: Clock, t: "سرعة فائقة في التنفيذ" },
-    { icon: MessageCircle, t: "دعم تليجرام + واتساب 24/7" },
-    { icon: TrendingUp, t: "ضمان بلوغ الديفيجن أو التعويض" },
+    { img: "/3d/shield-3d.jpg", t: "حماية وتشفير 100%", sub: "حساب Konami ID بأمان تام" },
+    { img: "/3d/trophy-3d.jpg", t: "ضمان بلوغ الديفيجن 1", sub: "كادر محترفين مصنفين عالمياً" },
+    { img: "/3d/booster-3d.jpg", t: "سرعة تسليم فائقة", sub: "بدء فوري ومتابعة خطوة بخطوة" },
+    { img: "/3d/crown-3d.jpg", t: "ضمان حصد اللاعبين VIP", sub: "تفتيح بطاقات الإيبك والشوتيم" },
   ];
   return (
-    <section className="border-y border-slate-200/80 bg-white py-6">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-6 sm:gap-10 px-4 text-xs sm:text-sm font-extrabold text-slate-700">
+    <section className="border-y border-slate-200/80 bg-gradient-to-r from-white via-slate-50 to-white py-8">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
         {items.map((i) => (
-          <div key={i.t} className="flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <i.icon className="size-4" />
-            </span>
-            <span>{i.t}</span>
+          <div
+            key={i.t}
+            className="group flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs hover:shadow-md hover:border-primary/40 transition duration-300"
+          >
+            <div className="relative size-12 shrink-0 overflow-hidden rounded-2xl border border-white/50 shadow-sm group-hover:scale-110 transition duration-300">
+              <img src={i.img} alt={i.t} className="size-full object-cover" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-black text-slate-900">{i.t}</div>
+              <div className="text-[11px] font-bold text-slate-500">{i.sub}</div>
+            </div>
           </div>
         ))}
       </div>
@@ -226,26 +251,31 @@ function TrustStrip() {
 
 function HowItWorks() {
   const steps = [
-    { n: "1", t: "اختر الخدمة", d: "اختر نوع الخدمة المناسبة (ديفيجن أو ضمان لاعب)" },
-    { n: "2", t: "املأ البيانات", d: "أدخل معلومات حسابك والديفيجن المطلوب بدقة" },
-    { n: "3", t: "الدفع والتأكيد", d: "اختر وسيلة الدفع المناسبة وأكد طلبك بلمسة واحدة" },
-    { n: "4", t: "استلم النتيجة", d: "يبدأ اللاعب المحترف فوراً وتتابع تقدمك لحظة بلحظة" },
+    { n: "1", t: "اختر الخدمة", d: "اختر نوع الخدمة المناسبة (ديفيجن أو ضمان لاعب)", img: "/3d/crown-3d.jpg" },
+    { n: "2", t: "املأ البيانات", d: "أدخل معلومات حسابك والديفيجن المطلوب بدقة", img: "/3d/shield-3d.jpg" },
+    { n: "3", t: "الدفع والتأكيد", d: "اختر وسيلة الدفع المناسبة وأكد طلبك بلمسة واحدة", img: "/3d/booster-3d.jpg" },
+    { n: "4", t: "استلم النتيجة", d: "يبدأ اللاعب المحترف فوراً وتتابع تقدمك لحظة بلحظة", img: "/3d/trophy-3d.jpg" },
   ];
   return (
-    <section id="how" className="scroll-mt-20 px-4 py-20 bg-slate-50/50">
+    <section id="how" className="scroll-mt-20 px-4 py-20 bg-slate-50/70">
       <div className="mx-auto max-w-6xl">
         <Header title="كيف نعمل؟" sub="4 خطوات بسيطة وميسرة للوصول لهدفك بأمان تام" />
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s) => (
             <div
               key={s.n}
-              className="text-center rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm hover:shadow-md hover:-translate-y-1 transition duration-300"
+              className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm hover:shadow-xl hover:border-primary/40 transition duration-300"
             >
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-primary-strong text-xl font-black text-white shadow-md shadow-primary/20">
-                {s.n}
+              <div className="mb-4 flex items-center justify-between">
+                <div className="size-14 overflow-hidden rounded-2xl border border-slate-100 shadow-md group-hover:scale-110 transition duration-300">
+                  <img src={s.img} alt={s.t} className="size-full object-cover" />
+                </div>
+                <span className="flex size-9 items-center justify-center rounded-2xl bg-primary/10 text-base font-black text-primary">
+                  {s.n}
+                </span>
               </div>
-              <h3 className="mb-2 text-base font-black text-slate-900">{s.t}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed font-medium">{s.d}</p>
+              <h3 className="mb-2 text-lg font-black text-slate-900">{s.t}</h3>
+              <p className="text-xs font-medium text-slate-500 leading-relaxed">{s.d}</p>
             </div>
           ))}
         </div>
