@@ -91,17 +91,17 @@ function Hero({ settings }: { settings: SiteSettingsDoc | null }) {
           <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
             {typeof settings?.heroHeadline === "string" && settings.heroHeadline.trim()
               ? settings.heroHeadline.split(".").map((part, i) =>
-                  i === 0 ? (
-                    <span key={i}>{part}.</span>
-                  ) : (
-                    <span
-                      key={i}
-                      className="mt-2 block bg-gradient-to-l from-primary to-fg bg-clip-text text-transparent"
-                    >
-                      {part.trim()}
-                    </span>
-                  ),
-                )
+                i === 0 ? (
+                  <span key={i}>{part}.</span>
+                ) : (
+                  <span
+                    key={i}
+                    className="mt-2 block bg-gradient-to-l from-primary to-fg bg-clip-text text-transparent"
+                  >
+                    {part.trim()}
+                  </span>
+                ),
+              )
               : (
                 <>
                   العب أقل.
