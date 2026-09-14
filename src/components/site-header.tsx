@@ -19,26 +19,26 @@ export function SiteHeader() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-bg/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-2xl transition-all">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary font-extrabold text-on-primary shadow-[0_8px_20px_-8px_var(--color-primary)]">
+        <Link to="/" className="flex items-center gap-3 group">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-primary font-black text-white shadow-[0_8px_20px_-6px_var(--color-primary)] group-hover:scale-105 transition-transform">
             R
           </span>
           <span>
-            <span className="block text-lg font-extrabold leading-none text-fg">Rodrigo</span>
-            <span className="hidden text-xs text-primary font-semibold sm:block">eFootball Services</span>
+            <span className="block text-lg font-black leading-none text-slate-900 tracking-tight">Rodrigo</span>
+            <span className="hidden text-[11px] text-primary font-extrabold sm:block">eFootball Esports Services</span>
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-5 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               to={l.href}
-              className="text-sm font-bold text-muted transition hover:text-primary"
+              className="text-xs font-bold text-slate-600 transition hover:text-primary hover:-translate-y-0.5"
             >
               {l.label}
             </Link>
@@ -48,17 +48,17 @@ export function SiteHeader() {
         {/* Actions */}
         <div className="flex items-center gap-2.5">
           {user ? (
-            <div className="hidden sm:flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs">
+            <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs shadow-xs">
               <Link to="/dashboard" className="flex items-center gap-1.5 hover:text-primary transition">
                 <User className="size-3.5 text-primary" />
-                <span className="font-bold text-fg max-w-[100px] truncate">
+                <span className="font-extrabold text-slate-900 max-w-[100px] truncate">
                   {user.displayName || user.email?.split("@")[0]}
                 </span>
               </Link>
               <button
                 type="button"
                 onClick={() => void logout()}
-                className="text-muted hover:text-warn transition p-0.5"
+                className="text-slate-400 hover:text-rose-600 transition p-0.5"
                 title="تسجيل الخروج"
               >
                 <LogOut className="size-3.5" />
@@ -67,16 +67,16 @@ export function SiteHeader() {
           ) : (
             <Link
               to="/login"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-bold text-muted hover:text-fg hover:border-primary transition"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700 hover:text-slate-900 hover:border-primary/50 transition shadow-xs"
             >
-              <User className="size-3.5" />
-              تسجيل الدخول
+              <User className="size-3.5 text-primary" />
+              <span>تسجيل الدخول</span>
             </Link>
           )}
 
           <Link
             to="/order"
-            className="btn-primary min-h-10 items-center rounded-xl px-5 text-xs font-bold inline-flex shadow-sm"
+            className="btn-cta min-h-10 items-center rounded-2xl px-5 text-xs font-black inline-flex"
           >
             اطلب خدمة
           </Link>

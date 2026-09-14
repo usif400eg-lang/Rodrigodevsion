@@ -264,7 +264,7 @@ function ServicesCatalogPage() {
                         <Link
                           to="/order"
                           search={{ service: s.id }}
-                          className="btn-primary inline-flex min-h-11 items-center justify-center rounded-2xl text-xs font-extrabold shadow-sm hover:shadow-primary/30 transition"
+                          className="btn-cta inline-flex min-h-11 items-center justify-center rounded-2xl text-xs font-black shadow-md hover:shadow-orange-500/25 transition"
                         >
                           أطلب الآن
                         </Link>

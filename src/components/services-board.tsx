@@ -198,18 +198,18 @@ export function ServicesBoard() {
 
                   <div className="mt-auto">
                     {/* Price and Duration Box */}
-                    <div className="mb-5 flex items-center justify-between rounded-2xl bg-surface border border-border/80 px-4 py-3">
-                      <div className="flex items-baseline gap-1.5 font-extrabold">
-                        <span className="text-2xl text-primary font-black">{s.price}</span>
-                        <span className="text-xs text-muted font-semibold">{s.currency}</span>
+                    <div className="mb-4 flex items-center justify-between rounded-2xl bg-slate-50 border border-slate-200/80 px-4 py-3">
+                      <div className="flex items-baseline gap-1.5 font-black">
+                        <span className="text-2xl text-slate-900">{s.price}</span>
+                        <span className="text-xs text-slate-500 font-bold">{s.currency}</span>
                         {s.oldPrice ? (
-                          <span className="mr-1 text-xs text-muted line-through">
+                          <span className="mr-1 text-xs text-slate-400 line-through">
                             {s.oldPrice}
                           </span>
                         ) : null}
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted font-medium">
-                        <Clock className="size-3.5 text-muted" />
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
+                        <Clock className="size-3.5 text-primary" />
                         <span>{s.estimatedTime}</span>
                       </div>
                     </div>
@@ -218,7 +218,7 @@ export function ServicesBoard() {
                     <Link
                       to="/order"
                       search={{ service: s.id }}
-                      className="btn-primary inline-flex min-h-12 w-full items-center justify-center rounded-2xl text-base font-extrabold shadow-md hover:shadow-primary/30 transition-all hover:scale-[1.01]"
+                      className="btn-cta inline-flex min-h-12 w-full items-center justify-center rounded-2xl text-sm font-black shadow-md transition-all hover:scale-[1.01]"
                     >
                       أطلب الآن
                     </Link>

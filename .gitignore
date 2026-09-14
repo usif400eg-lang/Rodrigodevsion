@@ -40,3 +40,5 @@ Thumbs.db
 screenshots/
 artifacts/
 attachments/
+__pycache__/
+*.pyc

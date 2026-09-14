@@ -1,33 +1,38 @@
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #ffffff;
-  --color-surface: #f7f3ff;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
   --color-card: #ffffff;
-  --color-fg: #1a1028;
-  --color-muted: #6b6280;
+  --color-fg: #0f172a;
+  --color-muted: #64748b;
   --color-primary: #7c3aed;
   --color-primary-strong: #6d28d9;
-  --color-border: #e8def8;
-  --color-ok: #059669;
+  --color-border: #e2e8f0;
+  --color-ok: #10b981;
   --color-warn: #ea580c;
+  --color-cta: #ea580c;
+  --color-cta-strong: #c2410c;
   --color-on-primary: #ffffff;
   --radius-xl: 1rem;
   --radius-2xl: 1.25rem;
-  --font-sans: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --radius-3xl: 1.5rem;
+  --font-sans: "Tajawal", "Cairo", ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
   }
 
   body {
     background: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-sans);
+    letter-spacing: -0.01em;
   }
 
   button:not(:disabled),
@@ -37,8 +42,10 @@
 
   h1,
   h2,
-  h3 {
+  h3,
+  h4 {
     text-wrap: balance;
+    font-family: var(--font-sans);
   }
 
   p {
@@ -48,30 +55,45 @@
 
 @layer components {
   .glass {
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    box-shadow: 0 10px 30px -18px rgb(124 58 237 / 0.35);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06);
   }
 
   .btn-primary {
     background: var(--color-primary);
     color: var(--color-on-primary);
-    transition: transform 180ms ease, background 180ms ease;
+    box-shadow: 0 4px 14px -3px rgba(124, 58, 237, 0.35);
+    transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
   }
 
   .btn-primary:hover {
     background: var(--color-primary-strong);
-    transform: translateY(-1px);
+    transform: translateY(-1.5px);
+    box-shadow: 0 8px 20px -3px rgba(124, 58, 237, 0.45);
+  }
+
+  /* Vibrant Orange CTA button */
+  .btn-cta {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: #ffffff;
+    font-weight: 800;
+    box-shadow: 0 6px 18px -4px rgba(234, 88, 12, 0.4);
+    transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  }
+
+  .btn-cta:hover {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    transform: translateY(-1.5px);
+    box-shadow: 0 10px 22px -4px rgba(234, 88, 12, 0.55);
   }
 
   .hero-glow {
     background:
-      radial-gradient(ellipse 70% 50% at 80% 0%, rgb(124 58 237 / 0.12), transparent 60%),
+      radial-gradient(circle 600px at 85% 15%, rgba(124, 58, 237, 0.09), transparent 70%),
+      radial-gradient(circle 500px at 15% 45%, rgba(234, 88, 12, 0.06), transparent 70%),
       var(--color-bg);
-  }
-
-  .purple-wave {
-    background: linear-gradient(180deg, transparent 0%, var(--color-surface) 40%, var(--color-primary) 100%);
   }
 
   .card-epic {

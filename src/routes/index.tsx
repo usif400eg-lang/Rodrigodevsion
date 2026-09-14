@@ -115,31 +115,31 @@ function Hero({ settings }: { settings: SiteSettingsDoc | null }) {
             {settings?.heroSub ??
               "خدمات احترافية لرفع الديفيجن وضمان اللاعبين في eFootball Mobile. فريق متخصص، سرعة في التنفيذ، ودعم مستمر."}
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+          <div className="mt-8 flex flex-col justify-center gap-3.5 sm:flex-row lg:justify-start">
             <a
               href="#services"
-              className="btn-primary inline-flex min-h-12 items-center justify-center rounded-xl px-8 font-bold"
+              className="btn-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-8 text-sm font-black shadow-lg"
             >
               استكشف الخدمات
             </a>
             <Link
               to="/track"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-primary/30 px-8 font-semibold text-primary"
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-slate-300 bg-white px-8 text-sm font-extrabold text-slate-800 hover:border-primary hover:text-primary transition shadow-xs"
             >
               تتبع طلبك
             </Link>
           </div>
-          <div className="mt-12 flex items-center justify-center gap-8 lg:justify-start">
+          <div className="mt-12 flex items-center justify-center gap-6 sm:gap-8 lg:justify-start">
             <Stat
               value={settings?.stat1Value ?? "+1200"}
               label={settings?.stat1Label ?? "طلب مكتمل"}
             />
-            <span className="h-10 w-px bg-border" />
+            <span className="h-10 w-px bg-slate-200" />
             <Stat
               value={settings?.stat2Value ?? "24/7"}
               label={settings?.stat2Label ?? "دعم فني"}
             />
-            <span className="h-10 w-px bg-border" />
+            <span className="h-10 w-px bg-slate-200" />
             <Stat
               value={settings?.stat3Value ?? "~18س"}
               label={settings?.stat3Label ?? "متوسط الإنجاز"}
@@ -149,30 +149,30 @@ function Hero({ settings }: { settings: SiteSettingsDoc | null }) {
 
         {/* Hero card */}
         <div className="relative mx-auto w-full max-w-md">
-          <div className="glass rounded-3xl p-6 shadow-2xl">
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xl">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-extrabold text-on-primary">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-lg font-black text-white shadow-md shadow-primary/25">
                   D1
                 </div>
                 <div>
-                  <div className="font-bold">Division Boost</div>
-                  <div className="text-xs text-muted">من Div 3 → Div 1</div>
+                  <div className="font-black text-slate-900">Division Boost</div>
+                  <div className="text-xs font-semibold text-slate-500">من Div 3 → Div 1</div>
                 </div>
               </div>
-              <span className="rounded-full bg-warn px-2.5 py-1 text-[10px] font-bold text-bg">
-                الأكثر طلباً
+              <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1 text-[11px] font-black text-white shadow-sm">
+                الأكثر طلباً ⭐
               </span>
             </div>
-            <div className="mb-4 flex justify-between text-sm">
-              <span className="text-muted">التقدم</span>
-              <span className="font-medium text-primary">Div 2 • 1680 Rating</span>
+            <div className="mb-4 flex justify-between text-xs font-bold">
+              <span className="text-slate-500">التقدم الفعلي</span>
+              <span className="text-primary font-black">Div 2 • 1680 Rating</span>
             </div>
-            <div className="mb-5 h-2.5 overflow-hidden rounded-full bg-surface">
-              <div className="h-full w-[72%] rounded-full bg-primary" />
+            <div className="mb-5 h-3 overflow-hidden rounded-full bg-slate-100 p-0.5 border border-slate-200/50">
+              <div className="h-full w-[74%] rounded-full bg-gradient-to-r from-primary to-primary-strong shadow-xs" />
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <Mini n="+3" l="فوز" />
+            <div className="grid grid-cols-3 gap-2.5 text-center">
+              <Mini n="+3" l="فوز متتالي" />
               <Mini n="18س" l="متبقي" />
               <Mini n="400" l="جنيه" />
             </div>
@@ -186,35 +186,37 @@ function Hero({ settings }: { settings: SiteSettingsDoc | null }) {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center">
-      <div className="text-2xl font-extrabold tabular-nums">{value}</div>
-      <div className="text-xs text-muted">{label}</div>
+      <div className="text-2xl sm:text-3xl font-black tabular-nums text-slate-900 tracking-tight">{value}</div>
+      <div className="text-xs font-bold text-slate-500 mt-0.5">{label}</div>
     </div>
   );
 }
 
 function Mini({ n, l }: { n: string; l: string }) {
   return (
-    <div className="rounded-xl bg-surface py-3">
-      <div className="text-lg font-bold">{n}</div>
-      <div className="text-[10px] text-muted">{l}</div>
+    <div className="rounded-2xl bg-slate-50 border border-slate-200/70 py-3 px-2">
+      <div className="text-lg font-black text-slate-900">{n}</div>
+      <div className="text-[11px] font-bold text-slate-500 mt-0.5">{l}</div>
     </div>
   );
 }
 
 function TrustStrip() {
   const items = [
-    { icon: ShieldCheck, t: "خدمة يدوية آمنة" },
-    { icon: Clock, t: "سرعة في التنفيذ" },
-    { icon: MessageCircle, t: "دعم تليجرام + واتساب" },
-    { icon: TrendingUp, t: "ضمان الجودة" },
+    { icon: ShieldCheck, t: "خدمة يدوية آمنة 100%" },
+    { icon: Clock, t: "سرعة فائقة في التنفيذ" },
+    { icon: MessageCircle, t: "دعم تليجرام + واتساب 24/7" },
+    { icon: TrendingUp, t: "ضمان بلوغ الديفيجن أو التعويض" },
   ];
   return (
-    <section className="border-y border-border bg-surface/70">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-8 px-4 py-6 text-sm text-muted">
+    <section className="border-y border-slate-200/80 bg-white py-6">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-6 sm:gap-10 px-4 text-xs sm:text-sm font-extrabold text-slate-700">
         {items.map((i) => (
-          <div key={i.t} className="flex items-center gap-2">
-            <i.icon className="size-5 text-primary" />
-            {i.t}
+          <div key={i.t} className="flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <i.icon className="size-4" />
+            </span>
+            <span>{i.t}</span>
           </div>
         ))}
       </div>
@@ -224,23 +226,26 @@ function TrustStrip() {
 
 function HowItWorks() {
   const steps = [
-    { n: "1", t: "اختر الخدمة", d: "اختر نوع الخدمة المناسبة (Division أو Player)" },
-    { n: "2", t: "املأ البيانات", d: "أدخل معلومات حسابك والتفاصيل المطلوبة" },
-    { n: "3", t: "ادفع وتواصل", d: "تواصل معنا على تليجرام أو واتساب لإتمام الدفع" },
-    { n: "4", t: "استلم النتيجة", d: "نبدأ الشغل ونتابعك لحد ما توصل هدفك" },
+    { n: "1", t: "اختر الخدمة", d: "اختر نوع الخدمة المناسبة (ديفيجن أو ضمان لاعب)" },
+    { n: "2", t: "املأ البيانات", d: "أدخل معلومات حسابك والديفيجن المطلوب بدقة" },
+    { n: "3", t: "الدفع والتأكيد", d: "اختر وسيلة الدفع المناسبة وأكد طلبك بلمسة واحدة" },
+    { n: "4", t: "استلم النتيجة", d: "يبدأ اللاعب المحترف فوراً وتتابع تقدمك لحظة بلحظة" },
   ];
   return (
-    <section id="how" className="scroll-mt-20 px-4 py-20">
+    <section id="how" className="scroll-mt-20 px-4 py-20 bg-slate-50/50">
       <div className="mx-auto max-w-6xl">
-        <Header title="كيف نعمل؟" sub="4 خطوات بسيطة توصل لهدفك" />
+        <Header title="كيف نعمل؟" sub="4 خطوات بسيطة وميسرة للوصول لهدفك بأمان تام" />
         <div className="grid gap-6 md:grid-cols-4">
           {steps.map((s) => (
-            <div key={s.n} className="text-center">
-              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary text-xl font-extrabold text-on-primary">
+            <div
+              key={s.n}
+              className="text-center rounded-3xl border border-slate-200/80 bg-white p-7 shadow-sm hover:shadow-md hover:-translate-y-1 transition duration-300"
+            >
+              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-primary-strong text-xl font-black text-white shadow-md shadow-primary/20">
                 {s.n}
               </div>
-              <h3 className="mb-2 font-bold">{s.t}</h3>
-              <p className="text-sm text-muted">{s.d}</p>
+              <h3 className="mb-2 text-base font-black text-slate-900">{s.t}</h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">{s.d}</p>
             </div>
           ))}
         </div>
@@ -251,21 +256,22 @@ function HowItWorks() {
 
 function Faq({ items }: { items?: FaqDoc[] }) {
   const display = (items && items.length > 0) ? items : [
-    { id: "1", question: "كيف أدفع؟", answer: "بعد تقديم الطلب هتتواصل معانا على تليجرام أو واتساب.", sortOrder: 1, active: true },
-    { id: "2", question: "هل الحساب آمن؟", answer: "بنشتغل يدوي 100% وما بنستخدمش برامج ممنوعة.", sortOrder: 2, active: true },
+    { id: "1", question: "كيف أدفع؟", answer: "نوفر وسائل دفع متعددة تشمل فودافون كاش، إنستاباي، والتحويلات البنكية والمحفظة.", sortOrder: 1, active: true },
+    { id: "2", question: "هل الحساب آمن من الباند؟", answer: "نعم آمن 100%، اللعب يدوي بالكامل بواسطة مصنفين محترفين بدون أي برامج ممنوعة.", sortOrder: 2, active: true },
   ];
 
   return (
     <section id="faq" className="scroll-mt-20 px-4 py-20">
       <div className="mx-auto max-w-3xl">
-        <Header title="أسئلة شائعة" />
-        <div className="space-y-3">
+        <Header title="أسئلة شائعة" sub="كل ما تود معرفته عن أمان الحساب وضمانات اللعب" />
+        <div className="space-y-3.5">
           {display.map((f) => (
-            <details key={f.id} className="glass rounded-xl">
-              <summary className="cursor-pointer list-none p-5 font-medium">
-                {f.question}
+            <details key={f.id} className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden group">
+              <summary className="cursor-pointer list-none p-5 font-black text-sm text-slate-900 hover:text-primary transition flex justify-between items-center">
+                <span>{f.question}</span>
+                <span className="text-xs text-primary font-bold">عرض الإجابة</span>
               </summary>
-              <p className="px-5 pb-5 text-sm leading-relaxed text-muted">{f.answer}</p>
+              <p className="px-5 pb-5 pt-1 text-xs text-slate-500 leading-relaxed font-medium border-t border-slate-100">{f.answer}</p>
             </details>
           ))}
         </div>
@@ -277,18 +283,19 @@ function Faq({ items }: { items?: FaqDoc[] }) {
 function Cta() {
   return (
     <section className="px-4 py-16">
-      <div className="glass mx-auto max-w-4xl rounded-3xl p-8 text-center md:p-12">
-        <h2 className="mb-4 text-2xl font-extrabold md:text-3xl">
-          جاهز توصل Division 1؟
+      <div className="mx-auto max-w-4xl rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#1e1035] p-8 sm:p-12 text-center text-white shadow-xl relative overflow-hidden">
+        <div className="absolute -left-10 -top-10 size-40 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <h2 className="mb-3 text-2xl sm:text-4xl font-black tracking-tight">
+          جاهز للوصول إلى الديفيجن الأول؟
         </h2>
-        <p className="mx-auto mb-8 max-w-md text-muted">
-          تواصل معانا دلوقتي وهنساعدك توصل لهدفك في أسرع وقت.
+        <p className="mx-auto mb-8 max-w-md text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+          انضم لأكثر من 1200 عميل وثقوا في خدماتنا، واطلب وصول حسابك لأعلى المراتب في أسرع وقت.
         </p>
         <Link
           to="/order"
-          className="btn-primary inline-flex min-h-12 items-center rounded-xl px-8 font-bold"
+          className="btn-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-10 text-sm font-black shadow-lg"
         >
-          ابدأ الطلب
+          ابدأ طلبك الآن
         </Link>
       </div>
     </section>

@@ -255,7 +255,7 @@ function ServiceDetailsPage() {
                 <Link
                   to="/order"
                   search={{ service: service.id }}
-                  className="btn-primary w-full min-h-12 items-center justify-center rounded-2xl text-base font-extrabold shadow-md hover:shadow-primary/30 transition flex gap-2"
+                  className="btn-cta w-full min-h-12 items-center justify-center rounded-2xl text-base font-black shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition flex gap-2"
                 >
                   <Zap className="size-4" />
                   <span>اطلب هذه الخدمة الآن</span>
