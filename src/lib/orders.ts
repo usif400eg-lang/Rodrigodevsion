@@ -59,6 +59,8 @@ export async function createOrderFirestore(data: {
   whatsapp?: string;
   answers: Record<string, string>;
   sessionId?: string;
+  couponCode?: string;
+  discountAmount?: number;
 }): Promise<OrderDoc> {
   const orderId = await generateOrderId();
   const now = new Date().toISOString();
@@ -71,7 +73,11 @@ export async function createOrderFirestore(data: {
     customerName: data.customerName,
     telegram: data.telegram,
     whatsapp: data.whatsapp ?? "",
-    answers: data.answers,
+    answers: {
+      ...data.answers,
+      ...(data.couponCode ? { "كود الخصم": data.couponCode } : {}),
+      ...(data.discountAmount ? { "قيمة الخصم": `${data.discountAmount} ${data.currency}` } : {}),
+    },
     status: "NEW",
     paymentStatus: "UNPAID",
     sessionId: data.sessionId,

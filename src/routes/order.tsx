@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { collection, doc, getDoc, getDocs, orderBy, query, where } from "firebase/firestore";
-import { Check, Clock, HelpCircle, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { Check, Clock, HelpCircle, MessageCircle, Percent, Phone, ShieldCheck, Tag } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { db } from "@/lib/firebase";
-import type { ContactSettingsDoc, PlayerDoc, QuestionDoc, ServiceDoc } from "@/lib/firebase-types";
+import type { ContactSettingsDoc, CouponDoc, PlayerDoc, QuestionDoc, ServiceDoc } from "@/lib/firebase-types";
 import { SERVICES } from "@/lib/catalog";
 import { createOrderFirestore } from "@/lib/orders";
 import { z } from "zod";
@@ -106,6 +106,12 @@ function OrderPage() {
   const [playersList, setPlayersList] = useState<PlayerDoc[]>([]);
   const [isCustomPlayer, setIsCustomPlayer] = useState(false);
   const [customPlayerText, setCustomPlayerText] = useState("");
+
+  // Coupon code states
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponDoc | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   // Load services and contact
   useEffect(() => {
@@ -263,6 +269,64 @@ function OrderPage() {
     else void submit();
   }
 
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return;
+    setCheckingCoupon(true);
+    setCouponError("");
+
+    try {
+      const code = couponInput.trim().toUpperCase();
+      const q = query(
+        collection(db, "coupons"),
+        where("code", "==", code),
+        where("active", "==", true),
+      );
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        setCouponError("كود الخصم غير صالح أو غير موجود");
+        setAppliedCoupon(null);
+      } else {
+        const c = { ...snap.docs[0].data(), id: snap.docs[0].id } as CouponDoc;
+        if (c.maxUses && c.usedCount >= c.maxUses) {
+          setCouponError("انتهى الحد الأقصى لاستخدام هذا الكوبون");
+          setAppliedCoupon(null);
+        } else if (c.expiresAt && new Date(c.expiresAt) < new Date()) {
+          setCouponError("هذا الكوبون منتهي الصلاحية");
+          setAppliedCoupon(null);
+        } else {
+          setAppliedCoupon(c);
+          setCouponError("");
+        }
+      }
+    } catch (err) {
+      console.warn("Coupon check error:", err);
+      // Fallback check for offline default coupons
+      if (couponInput.trim().toUpperCase() === "RODRIGO15") {
+        setAppliedCoupon({
+          id: "coupon-rodrigo15",
+          code: "RODRIGO15",
+          discount: 15,
+          maxUses: 500,
+          usedCount: 1,
+          active: true,
+          createdAt: new Date().toISOString(),
+        });
+        setCouponError("");
+      } else {
+        setCouponError("تعذر التحقق من الكوبون حالياً");
+      }
+    } finally {
+      setCheckingCoupon(false);
+    }
+  }
+
+  const originalPrice = selectedService?.price || 0;
+  const discountAmount = appliedCoupon
+    ? Math.round((originalPrice * appliedCoupon.discount) / 100)
+    : 0;
+  const finalPrice = Math.max(0, originalPrice - discountAmount);
+
   async function submit() {
     if (!selectedService) return;
 
@@ -299,14 +363,30 @@ function OrderPage() {
       const order = await createOrderFirestore({
         serviceId: selectedService.id,
         serviceName: selectedService.name,
-        price: selectedService.price,
+        price: finalPrice,
         currency: selectedService.currency,
         customerName: customerName.trim(),
         telegram: telegram.trim(),
         whatsapp: whatsapp.trim() || undefined,
         answers,
         sessionId: crypto.randomUUID(),
+        couponCode: appliedCoupon?.code,
+        discountAmount: discountAmount > 0 ? discountAmount : undefined,
       });
+
+      // Increment coupon used count if applied
+      if (appliedCoupon?.id) {
+        try {
+          const cRef = doc(db, "coupons", appliedCoupon.id);
+          const cSnap = await getDoc(cRef);
+          if (cSnap.exists()) {
+            const currentUses = cSnap.data().usedCount || 0;
+            await updateDoc(cRef, { usedCount: currentUses + 1 });
+          }
+        } catch {
+          // ignore tracking error
+        }
+      }
 
       incrementSessionOrderCount();
       setDoneId(order.orderId);
@@ -817,6 +897,75 @@ function OrderPage() {
                     <span className="font-semibold text-fg max-w-[200px] truncate">{v}</span>
                   </div>
                 ))}
+              </div>
+
+              {/* Coupon Code Section in Step 3 */}
+              <div className="rounded-2xl border border-border bg-surface p-4 space-y-2.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-fg">
+                  <Tag className="size-4 text-primary" />
+                  <span>هل لديك كوبون خصم؟</span>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    disabled={checkingCoupon || !!appliedCoupon}
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    placeholder="أدخل كود الخصم (مثل: RODRIGO15)"
+                    className="flex-1 rounded-xl border border-border bg-card px-3.5 py-2 text-xs font-mono font-bold uppercase tracking-wider text-fg outline-none focus:border-primary"
+                  />
+                  {appliedCoupon ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppliedCoupon(null);
+                        setCouponInput("");
+                      }}
+                      className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-xs font-bold text-rose-500 hover:bg-rose-500/20 transition"
+                    >
+                      إلغاء الكوبون
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={checkingCoupon || !couponInput.trim()}
+                      onClick={handleApplyCoupon}
+                      className="btn-primary rounded-xl px-5 py-2 text-xs font-black shadow-xs disabled:opacity-50"
+                    >
+                      {checkingCoupon ? "جاري التحقق..." : "تطبيق"}
+                    </button>
+                  )}
+                </div>
+
+                {appliedCoupon && (
+                  <div className="flex items-center justify-between rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-xs font-bold text-emerald-500">
+                    <div className="flex items-center gap-1.5">
+                      <Check className="size-3.5" />
+                      <span>تم تطبيق كود ({appliedCoupon.code}) بنجاح!</span>
+                    </div>
+                    <span>خصم {appliedCoupon.discount}% (-{discountAmount} {selectedService?.currency})</span>
+                  </div>
+                )}
+
+                {couponError && (
+                  <p className="text-xs font-bold text-rose-500">{couponError}</p>
+                )}
+
+                {/* Final Total Price Box */}
+                <div className="border-t border-border pt-3 flex items-center justify-between">
+                  <span className="text-xs font-bold text-fg">الإجمالي النهائي المطلوب:</span>
+                  <div className="flex items-baseline gap-1.5">
+                    {appliedCoupon && (
+                      <span className="text-xs text-muted line-through">
+                        {originalPrice} {selectedService?.currency}
+                      </span>
+                    )}
+                    <span className="text-xl font-black text-primary">
+                      {finalPrice} {selectedService?.currency}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs text-primary space-y-1">

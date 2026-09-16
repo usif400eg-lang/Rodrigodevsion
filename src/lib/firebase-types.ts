@@ -200,16 +200,36 @@ export interface ActivityLogDoc {
   createdAt: string;
 }
 
+// ─── offers/{id} ───────────────────────────────────────────────────────────
+export interface OfferDoc {
+  id: string;
+  title: string;
+  badge?: string;
+  discount: string; // e.g. "خصم 30%"
+  price: string;
+  oldPrice?: string;
+  currency: string;
+  duration?: string;
+  desc: string;
+  features: string[];
+  highlight: boolean;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // ─── coupons/{id} ──────────────────────────────────────────────────────────
 export interface CouponDoc {
   id: string;
   code: string;
-  discount: number; // percentage
+  discount: number; // percentage e.g. 15 for 15%
   maxUses: number;
   usedCount: number;
   expiresAt?: string;
   active: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
 
 // ─── settings/site ─────────────────────────────────────────────────────────

@@ -33,12 +33,14 @@ import { Route as AdminLayoutIndexRouteImport } from './routes/admin/_layout/ind
 import { Route as AdminLayoutActivityRouteImport } from './routes/admin/_layout/activity'
 import { Route as AdminLayoutBlockedUsersRouteImport } from './routes/admin/_layout/blocked-users'
 import { Route as AdminLayoutContactRouteImport } from './routes/admin/_layout/contact'
+import { Route as AdminLayoutCouponsRouteImport } from './routes/admin/_layout/coupons'
 import { Route as AdminLayoutCustomersRouteImport } from './routes/admin/_layout/customers'
 import { Route as AdminLayoutFaqRouteImport } from './routes/admin/_layout/faq'
 import { Route as AdminLayoutFormsRouteImport } from './routes/admin/_layout/forms'
 import { Route as AdminLayoutHomepageRouteImport } from './routes/admin/_layout/homepage'
 import { Route as AdminLayoutMediaRouteImport } from './routes/admin/_layout/media'
 import { Route as AdminLayoutNotificationsRouteImport } from './routes/admin/_layout/notifications'
+import { Route as AdminLayoutOffersRouteImport } from './routes/admin/_layout/offers'
 import { Route as AdminLayoutPlayersRouteImport } from './routes/admin/_layout/players'
 import { Route as AdminLayoutSecurityRouteImport } from './routes/admin/_layout/security'
 import { Route as AdminLayoutServicesRouteImport } from './routes/admin/_layout/services'
@@ -167,6 +169,11 @@ const AdminLayoutContactRoute = AdminLayoutContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => AdminLayoutRoute,
 } as any)
+const AdminLayoutCouponsRoute = AdminLayoutCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
 const AdminLayoutCustomersRoute = AdminLayoutCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -198,6 +205,11 @@ const AdminLayoutNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AdminLayoutRoute,
   } as any)
+const AdminLayoutOffersRoute = AdminLayoutOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AdminLayoutRoute,
+} as any)
 const AdminLayoutPlayersRoute = AdminLayoutPlayersRouteImport.update({
   id: '/players',
   path: '/players',
@@ -259,12 +271,14 @@ export interface FileRoutesByFullPath {
   '/admin/activity': typeof AdminLayoutActivityRoute
   '/admin/blocked-users': typeof AdminLayoutBlockedUsersRoute
   '/admin/contact': typeof AdminLayoutContactRoute
+  '/admin/coupons': typeof AdminLayoutCouponsRoute
   '/admin/customers': typeof AdminLayoutCustomersRoute
   '/admin/faq': typeof AdminLayoutFaqRoute
   '/admin/forms': typeof AdminLayoutFormsRoute
   '/admin/homepage': typeof AdminLayoutHomepageRoute
   '/admin/media': typeof AdminLayoutMediaRoute
   '/admin/notifications': typeof AdminLayoutNotificationsRoute
+  '/admin/offers': typeof AdminLayoutOffersRoute
   '/admin/players': typeof AdminLayoutPlayersRoute
   '/admin/security': typeof AdminLayoutSecurityRoute
   '/admin/services': typeof AdminLayoutServicesRoute
@@ -297,12 +311,14 @@ export interface FileRoutesByTo {
   '/admin/activity': typeof AdminLayoutActivityRoute
   '/admin/blocked-users': typeof AdminLayoutBlockedUsersRoute
   '/admin/contact': typeof AdminLayoutContactRoute
+  '/admin/coupons': typeof AdminLayoutCouponsRoute
   '/admin/customers': typeof AdminLayoutCustomersRoute
   '/admin/faq': typeof AdminLayoutFaqRoute
   '/admin/forms': typeof AdminLayoutFormsRoute
   '/admin/homepage': typeof AdminLayoutHomepageRoute
   '/admin/media': typeof AdminLayoutMediaRoute
   '/admin/notifications': typeof AdminLayoutNotificationsRoute
+  '/admin/offers': typeof AdminLayoutOffersRoute
   '/admin/players': typeof AdminLayoutPlayersRoute
   '/admin/security': typeof AdminLayoutSecurityRoute
   '/admin/services': typeof AdminLayoutServicesRoute
@@ -337,12 +353,14 @@ export interface FileRoutesById {
   '/admin/_layout/activity': typeof AdminLayoutActivityRoute
   '/admin/_layout/blocked-users': typeof AdminLayoutBlockedUsersRoute
   '/admin/_layout/contact': typeof AdminLayoutContactRoute
+  '/admin/_layout/coupons': typeof AdminLayoutCouponsRoute
   '/admin/_layout/customers': typeof AdminLayoutCustomersRoute
   '/admin/_layout/faq': typeof AdminLayoutFaqRoute
   '/admin/_layout/forms': typeof AdminLayoutFormsRoute
   '/admin/_layout/homepage': typeof AdminLayoutHomepageRoute
   '/admin/_layout/media': typeof AdminLayoutMediaRoute
   '/admin/_layout/notifications': typeof AdminLayoutNotificationsRoute
+  '/admin/_layout/offers': typeof AdminLayoutOffersRoute
   '/admin/_layout/players': typeof AdminLayoutPlayersRoute
   '/admin/_layout/security': typeof AdminLayoutSecurityRoute
   '/admin/_layout/services': typeof AdminLayoutServicesRoute
@@ -378,12 +396,14 @@ export interface FileRouteTypes {
     | '/admin/activity'
     | '/admin/blocked-users'
     | '/admin/contact'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/faq'
     | '/admin/forms'
     | '/admin/homepage'
     | '/admin/media'
     | '/admin/notifications'
+    | '/admin/offers'
     | '/admin/players'
     | '/admin/security'
     | '/admin/services'
@@ -416,12 +436,14 @@ export interface FileRouteTypes {
     | '/admin/activity'
     | '/admin/blocked-users'
     | '/admin/contact'
+    | '/admin/coupons'
     | '/admin/customers'
     | '/admin/faq'
     | '/admin/forms'
     | '/admin/homepage'
     | '/admin/media'
     | '/admin/notifications'
+    | '/admin/offers'
     | '/admin/players'
     | '/admin/security'
     | '/admin/services'
@@ -455,12 +477,14 @@ export interface FileRouteTypes {
     | '/admin/_layout/activity'
     | '/admin/_layout/blocked-users'
     | '/admin/_layout/contact'
+    | '/admin/_layout/coupons'
     | '/admin/_layout/customers'
     | '/admin/_layout/faq'
     | '/admin/_layout/forms'
     | '/admin/_layout/homepage'
     | '/admin/_layout/media'
     | '/admin/_layout/notifications'
+    | '/admin/_layout/offers'
     | '/admin/_layout/players'
     | '/admin/_layout/security'
     | '/admin/_layout/services'
@@ -664,6 +688,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutContactRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
+    '/admin/_layout/coupons': {
+      id: '/admin/_layout/coupons'
+      path: '/coupons'
+      fullPath: '/admin/coupons'
+      preLoaderRoute: typeof AdminLayoutCouponsRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
     '/admin/_layout/customers': {
       id: '/admin/_layout/customers'
       path: '/customers'
@@ -704,6 +735,13 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/admin/notifications'
       preLoaderRoute: typeof AdminLayoutNotificationsRouteImport
+      parentRoute: typeof AdminLayoutRoute
+    }
+    '/admin/_layout/offers': {
+      id: '/admin/_layout/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminLayoutOffersRouteImport
       parentRoute: typeof AdminLayoutRoute
     }
     '/admin/_layout/players': {
@@ -762,12 +800,14 @@ interface AdminLayoutRouteChildren {
   AdminLayoutActivityRoute: typeof AdminLayoutActivityRoute
   AdminLayoutBlockedUsersRoute: typeof AdminLayoutBlockedUsersRoute
   AdminLayoutContactRoute: typeof AdminLayoutContactRoute
+  AdminLayoutCouponsRoute: typeof AdminLayoutCouponsRoute
   AdminLayoutCustomersRoute: typeof AdminLayoutCustomersRoute
   AdminLayoutFaqRoute: typeof AdminLayoutFaqRoute
   AdminLayoutFormsRoute: typeof AdminLayoutFormsRoute
   AdminLayoutHomepageRoute: typeof AdminLayoutHomepageRoute
   AdminLayoutMediaRoute: typeof AdminLayoutMediaRoute
   AdminLayoutNotificationsRoute: typeof AdminLayoutNotificationsRoute
+  AdminLayoutOffersRoute: typeof AdminLayoutOffersRoute
   AdminLayoutPlayersRoute: typeof AdminLayoutPlayersRoute
   AdminLayoutSecurityRoute: typeof AdminLayoutSecurityRoute
   AdminLayoutServicesRoute: typeof AdminLayoutServicesRoute
@@ -782,12 +822,14 @@ const AdminLayoutRouteChildren: AdminLayoutRouteChildren = {
   AdminLayoutActivityRoute: AdminLayoutActivityRoute,
   AdminLayoutBlockedUsersRoute: AdminLayoutBlockedUsersRoute,
   AdminLayoutContactRoute: AdminLayoutContactRoute,
+  AdminLayoutCouponsRoute: AdminLayoutCouponsRoute,
   AdminLayoutCustomersRoute: AdminLayoutCustomersRoute,
   AdminLayoutFaqRoute: AdminLayoutFaqRoute,
   AdminLayoutFormsRoute: AdminLayoutFormsRoute,
   AdminLayoutHomepageRoute: AdminLayoutHomepageRoute,
   AdminLayoutMediaRoute: AdminLayoutMediaRoute,
   AdminLayoutNotificationsRoute: AdminLayoutNotificationsRoute,
+  AdminLayoutOffersRoute: AdminLayoutOffersRoute,
   AdminLayoutPlayersRoute: AdminLayoutPlayersRoute,
   AdminLayoutSecurityRoute: AdminLayoutSecurityRoute,
   AdminLayoutServicesRoute: AdminLayoutServicesRoute,
