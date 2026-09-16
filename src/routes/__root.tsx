@@ -8,8 +8,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Rodrigo — خدمات eFootball Mobile" },
-      { name: "description", content: "خدمات احترافية لرفع الديفيجن وضمان اللاعبين في eFootball Mobile." },
+      { title: "Rodrigo Division — رفع الديفيجن وضمان اللاعبين | eFootball Mobile" },
+      { name: "description", content: "منصة Rodrigo Division لخدمات eFootball Mobile الاحترافية: رفع الديفيجن، ضمان اللاعبين، وتفتيح البطاقات. فريق متخصص وسرعة في التنفيذ." },
       { name: "theme-color", content: "#7c3aed" },
     ],
     links: [
