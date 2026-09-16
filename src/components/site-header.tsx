@@ -19,16 +19,16 @@ export function SiteHeader() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-2xl transition-all">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#090d16]/80 backdrop-blur-2xl transition-all">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <span className="flex size-10 items-center justify-center rounded-xl bg-primary font-black text-white shadow-[0_8px_20px_-6px_var(--color-primary)] group-hover:scale-105 transition-transform">
+          <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-strong font-black text-white shadow-[0_0_20px_rgba(139,92,246,0.5)] group-hover:scale-105 transition-transform">
             R
           </span>
           <span>
-            <span className="block text-lg font-black leading-none text-slate-900 tracking-tight">Rodrigo</span>
-            <span className="hidden text-[11px] text-primary font-extrabold sm:block">eFootball Esports Services</span>
+            <span className="block text-lg font-black leading-none text-white tracking-tight">Rodrigo</span>
+            <span className="hidden text-[11px] text-cyan-400 font-extrabold sm:block">eFootball Esports Services</span>
           </span>
         </Link>
 
@@ -38,7 +38,7 @@ export function SiteHeader() {
             <Link
               key={l.href}
               to={l.href}
-              className="text-xs font-bold text-slate-600 transition hover:text-primary hover:-translate-y-0.5"
+              className="text-xs font-bold text-slate-300 transition hover:text-white hover:drop-shadow-[0_0_8px_rgba(139,92,246,0.6)] hover:-translate-y-0.5"
             >
               {l.label}
             </Link>
@@ -48,17 +48,17 @@ export function SiteHeader() {
         {/* Actions */}
         <div className="flex items-center gap-2.5">
           {user ? (
-            <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs shadow-xs">
+            <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs backdrop-blur-md">
               <Link to="/dashboard" className="flex items-center gap-1.5 hover:text-primary transition">
-                <User className="size-3.5 text-primary" />
-                <span className="font-extrabold text-slate-900 max-w-[100px] truncate">
+                <User className="size-3.5 text-cyan-400" />
+                <span className="font-extrabold text-slate-200 max-w-[100px] truncate">
                   {user.displayName || user.email?.split("@")[0]}
                 </span>
               </Link>
               <button
                 type="button"
                 onClick={() => void logout()}
-                className="text-slate-400 hover:text-rose-600 transition p-0.5"
+                className="text-slate-400 hover:text-rose-400 transition p-0.5"
                 title="تسجيل الخروج"
               >
                 <LogOut className="size-3.5" />
@@ -67,9 +67,9 @@ export function SiteHeader() {
           ) : (
             <Link
               to="/login"
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700 hover:text-slate-900 hover:border-primary/50 transition shadow-xs"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-2xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-extrabold text-slate-200 hover:text-white hover:border-primary/50 hover:bg-white/10 transition backdrop-blur-md"
             >
-              <User className="size-3.5 text-primary" />
+              <User className="size-3.5 text-cyan-400" />
               <span>تسجيل الدخول</span>
             </Link>
           )}

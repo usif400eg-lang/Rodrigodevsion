@@ -86,22 +86,22 @@ export function ServicesBoard() {
   }, [q, services]);
 
   return (
-    <section id="services" className="scroll-mt-16 bg-surface px-3 py-12 md:px-6">
+    <section id="services" className="scroll-mt-16 bg-[#090d16] px-3 py-16 md:px-6">
       <div className="mx-auto max-w-6xl">
         {/* Search */}
-        <div className="mx-auto mb-5 flex max-w-xl items-center gap-3 rounded-full border border-border bg-bg px-4 py-2 shadow-xs">
-          <Search className="size-5 shrink-0 text-muted" />
+        <div className="mx-auto mb-6 flex max-w-xl items-center gap-3 rounded-full border border-white/10 bg-slate-900/80 px-5 py-2.5 shadow-xl backdrop-blur-xl focus-within:border-primary/50 focus-within:shadow-[0_0_20px_rgba(139,92,246,0.2)] transition">
+          <Search className="size-5 shrink-0 text-cyan-400" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="ابحث عن خدمة..."
-            className="min-h-11 w-full bg-transparent text-base outline-none placeholder:text-muted"
+            className="min-h-11 w-full bg-transparent text-base text-white outline-none placeholder:text-slate-400 font-medium"
             aria-label="بحث"
           />
           {q ? (
             <button
               type="button"
-              className="text-muted"
+              className="text-slate-400 hover:text-white transition"
               onClick={() => setQ("")}
               aria-label="مسح البحث"
             >
@@ -111,19 +111,19 @@ export function ServicesBoard() {
         </div>
 
         {/* Category tabs */}
-        <div className="mb-5 flex flex-wrap items-center justify-center gap-3">
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/upgrades"
-            className="inline-flex min-h-11 items-center rounded-full border-2 border-primary px-7 text-sm font-extrabold text-primary hover:bg-primary/5 transition"
+            className="inline-flex min-h-11 items-center rounded-full border border-primary/40 bg-primary/10 px-7 text-sm font-extrabold text-cyan-300 hover:bg-primary/20 transition backdrop-blur-md shadow-[0_0_15px_rgba(139,92,246,0.15)]"
           >
             تطويرات اللاعبين
           </Link>
-          <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-7 text-sm font-extrabold text-on-primary shadow-sm">
+          <span className="inline-flex min-h-11 items-center rounded-full bg-primary px-7 text-sm font-extrabold text-white shadow-[0_0_20px_rgba(139,92,246,0.5)] border border-white/20">
             الخدمات
           </span>
         </div>
 
-        <p className="mx-auto mb-8 max-w-2xl text-center text-sm font-bold leading-relaxed text-muted md:text-base">
+        <p className="mx-auto mb-10 max-w-2xl text-center text-sm font-bold leading-relaxed text-slate-400 md:text-base">
           كل ما يخص الوصول للديفيجن الأول والتصنيف وضمان اللاعبين في أسرع وقت
           وتطويرات خاصة للاعبين
         </p>
@@ -137,25 +137,25 @@ export function ServicesBoard() {
               <ServiceSkeleton />
             </>
           ) : filtered.length === 0 ? (
-            <p className="col-span-full py-10 text-center text-muted">
+            <p className="col-span-full py-10 text-center text-slate-400">
               لا توجد خدمات مطابقة
             </p>
           ) : (
             filtered.map((s) => (
               <article
                 key={s.id}
-                className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[30px] border border-slate-200/90 bg-white shadow-md hover:shadow-2xl hover:border-primary/50 p-0 text-slate-900 min-h-[500px]"
+                className="card-3d group relative flex flex-col justify-between overflow-hidden rounded-[30px] border border-white/10 bg-slate-900/75 shadow-2xl hover:border-primary/50 p-0 text-white min-h-[500px] backdrop-blur-xl"
               >
                 {/* ── Full Width Image Header (Edge-to-Edge) ── */}
-                <div className="relative w-full h-52 sm:h-60 overflow-hidden bg-white flex items-center justify-center">
+                <div className="relative w-full h-52 sm:h-60 overflow-hidden bg-slate-950 flex items-center justify-center">
                   <img
                     src={s.images?.[0] || "/badges/div-1.svg"}
                     alt={s.name}
                     className="size-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
                   />
-                  {/* Downward reflection & subtle fade into the white card */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-transparent to-white/40 pointer-events-none" />
-                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+                  {/* Downward reflection & subtle fade into the card */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-slate-900/90 pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent pointer-events-none" />
 
                   {/* Floating 3D Badges */}
                   <div className="absolute top-3.5 inset-x-3.5 z-10 flex items-center justify-between pointer-events-none">
@@ -167,7 +167,7 @@ export function ServicesBoard() {
                     ) : (
                       <span />
                     )}
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/85 px-3 py-1 text-[11px] font-black text-white backdrop-blur-md shadow-md border border-white/10">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-950/85 px-3 py-1 text-[11px] font-black text-cyan-300 backdrop-blur-md shadow-md border border-white/15">
                       <img
                         src={s.type === "division_boost" ? "/3d/trophy-3d.jpg" : "/3d/crown-3d.jpg"}
                         alt=""
@@ -178,43 +178,31 @@ export function ServicesBoard() {
                   </div>
                 </div>
 
-                {/* Mirror reflection fading down seamlessly into white */}
-                {s.images?.[0] && (
-                  <div className="relative -mt-5 h-12 w-full flex items-center justify-center overflow-hidden pointer-events-none opacity-25">
-                    <img
-                      src={s.images[0]}
-                      alt=""
-                      className="size-full object-cover scale-y-[-1] blur-[1.5px]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/80 to-white" />
-                  </div>
-                )}
-
                 {/* ── Card Content Body ── */}
                 <div className="p-6 pt-2 flex flex-col flex-1 justify-between text-center">
                   <div>
-                    <h3 className="mb-2 text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    <h3 className="mb-2 text-xl sm:text-2xl font-black text-white tracking-tight">
                       {s.name}
                     </h3>
-                    <p className="mb-6 text-xs font-medium text-slate-500 leading-relaxed line-clamp-3 px-1 min-h-12">
+                    <p className="mb-6 text-xs font-medium text-slate-300 leading-relaxed line-clamp-3 px-1 min-h-12">
                       {s.description}
                     </p>
                   </div>
 
                   <div className="mt-auto">
                     {/* Price and Duration Box */}
-                    <div className="mb-4 flex items-center justify-between rounded-2xl bg-slate-50 border border-slate-200/80 px-4 py-3">
+                    <div className="mb-4 flex items-center justify-between rounded-2xl bg-white/[0.04] border border-white/10 px-4 py-3 backdrop-blur-md">
                       <div className="flex items-baseline gap-1.5 font-black">
-                        <span className="text-2xl text-slate-900">{s.price}</span>
-                        <span className="text-xs text-slate-500 font-bold">{s.currency}</span>
+                        <span className="text-2xl text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]">{s.price}</span>
+                        <span className="text-xs text-slate-400 font-bold">{s.currency}</span>
                         {s.oldPrice ? (
-                          <span className="mr-1 text-xs text-slate-400 line-through">
+                          <span className="mr-1 text-xs text-slate-500 line-through">
                             {s.oldPrice}
                           </span>
                         ) : null}
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
-                        <Clock className="size-3.5 text-primary" />
+                      <div className="flex items-center gap-1.5 text-xs text-slate-300 font-bold">
+                        <Clock className="size-3.5 text-cyan-400" />
                         <span>{s.estimatedTime}</span>
                       </div>
                     </div>

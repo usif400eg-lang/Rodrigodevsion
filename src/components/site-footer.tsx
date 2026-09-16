@@ -9,25 +9,25 @@ export function SiteFooter() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   return (
-    <footer className="border-t border-border bg-surface/50 pt-12 pb-8 text-fg">
+    <footer className="border-t border-white/10 bg-[#060910] pt-14 pb-10 text-slate-300">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-4">
         {/* Brand & About */}
         <div className="md:col-span-2">
           <div className="mb-4 flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary font-extrabold text-on-primary shadow-sm">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-strong font-extrabold text-white shadow-[0_0_20px_rgba(139,92,246,0.5)]">
               R
             </span>
-            <span className="text-xl font-extrabold">Rodrigo</span>
+            <span className="text-xl font-extrabold text-white tracking-tight">Rodrigo</span>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-muted">
+          <p className="max-w-sm text-sm leading-relaxed text-slate-400">
             منصة خدمات احترافية لـ eFootball Mobile. نساعدك توصل لديفيجن 1 وضمان اللاعبين بأمان وسرعة وسرية تامة.
           </p>
         </div>
 
         {/* Quick Links */}
         <div>
-          <h4 className="mb-3 text-sm font-bold text-fg">الخدمات والعروض</h4>
-          <ul className="space-y-2 text-sm text-muted">
+          <h4 className="mb-3 text-sm font-bold text-white">الخدمات والعروض</h4>
+          <ul className="space-y-2 text-sm text-slate-400">
             <li>
               <Link to="/services" className="hover:text-primary transition">
                 كتالوج الخدمات
