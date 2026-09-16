@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert } from "@/components/ui/app-modal";
 import type { ContactSettingsDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/contact")({
@@ -85,7 +86,11 @@ function AdminContactPage() {
       setTimeout(() => setSavedSuccess(false), 4000);
     } catch (err) {
       console.error("Save contact settings failed:", err);
-      alert("حدث خطأ أثناء الحفظ: " + (err instanceof Error ? err.message : String(err)));
+      await appAlert({
+        title: "خطأ في الحفظ",
+        message: "حدث خطأ أثناء الحفظ: " + (err instanceof Error ? err.message : String(err)),
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }

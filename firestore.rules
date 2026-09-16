@@ -140,8 +140,13 @@ service cloud.firestore {
     }
 
     match /coupons/{id} {
-      allow read: if isAtLeastAdmin();
+      allow read: if true;
       allow write: if isAtLeastAdmin();
+    }
+
+    match /offers/{id} {
+      allow read: if true;
+      allow create, update, delete: if isAtLeastAdmin();
     }
 
     match /dashboardStats/{id} {

@@ -28,11 +28,34 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { CouponDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/coupons")({
   component: AdminCouponsPage,
 });
+
+const COUPONS_STORAGE_KEY = "rodrigo_custom_coupons_v1";
+
+function loadCouponsFromLocal(): CouponDoc[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(COUPONS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to load local coupons:", e);
+  }
+  return null;
+}
+
+function saveCouponsToLocal(list: CouponDoc[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(COUPONS_STORAGE_KEY, JSON.stringify(list));
+  } catch (e) {
+    console.warn("Failed to save local coupons:", e);
+  }
+}
 
 const DEFAULT_COUPONS: CouponDoc[] = [
   {
@@ -76,28 +99,41 @@ function AdminCouponsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
+    // 1. Initial hydration from local cache
+    const local = loadCouponsFromLocal();
+    if (local && local.length > 0) {
+      setCoupons(local);
+      setLoading(false);
+    }
+
+    // 2. Firestore listener with fallback
     const q = query(collection(db, "coupons"));
     const unsubscribe = onSnapshot(
       q,
       async (snap) => {
         if (snap.empty) {
-          // Auto-seed default coupons
-          try {
-            for (const c of DEFAULT_COUPONS) {
-              await setDoc(doc(db, "coupons", c.id), c);
-            }
-          } catch {
+          if (!local || local.length === 0) {
             setCoupons(DEFAULT_COUPONS);
+            saveCouponsToLocal(DEFAULT_COUPONS);
+            try {
+              for (const c of DEFAULT_COUPONS) {
+                await setDoc(doc(db, "coupons", c.id), c);
+              }
+            } catch (e) {
+              console.warn("Auto-seed coupons error:", e);
+            }
           }
         } else {
           const list = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as CouponDoc);
           setCoupons(list);
+          saveCouponsToLocal(list);
         }
         setLoading(false);
       },
       (err) => {
-        console.warn("Coupons snapshot error, using defaults:", err);
-        setCoupons(DEFAULT_COUPONS);
+        console.warn("Coupons snapshot error, using defaults/local:", err);
+        const fallback = loadCouponsFromLocal() || DEFAULT_COUPONS;
+        setCoupons(fallback);
         setLoading(false);
       }
     );
@@ -147,19 +183,41 @@ function AdminCouponsPage() {
         updatedAt: new Date().toISOString(),
       };
 
+      let updatedList: CouponDoc[];
+
       if (editingCoupon) {
-        await updateDoc(doc(db, "coupons", editingCoupon.id), couponData);
-        if (session) {
-          await logActivity({
-            adminUid: session.user.uid,
-            adminName: session.admin.displayName,
-            action: "coupon_updated",
-            entityType: "settings",
-            entityId: editingCoupon.id,
-            before: editingCoupon as unknown as Record<string, unknown>,
-            after: couponData as unknown as Record<string, unknown>,
-          });
+        const updatedCoupon: CouponDoc = {
+          ...editingCoupon,
+          ...couponData,
+        };
+        updatedList = coupons.map((c) => (c.id === editingCoupon.id ? updatedCoupon : c));
+        setCoupons(updatedList);
+        saveCouponsToLocal(updatedList);
+
+        try {
+          await updateDoc(doc(db, "coupons", editingCoupon.id), couponData);
+          if (session) {
+            await logActivity({
+              adminUid: session.user.uid,
+              adminName: session.admin.displayName,
+              action: "coupon_updated",
+              entityType: "settings",
+              entityId: editingCoupon.id,
+              before: editingCoupon as unknown as Record<string, unknown>,
+              after: couponData as unknown as Record<string, unknown>,
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Firestore coupon update error:", dbErr);
         }
+
+        setIsModalOpen(false);
+        await appAlert({
+          title: "تم تعديل الكوبون بنجاح",
+          message: `تم تحديث بيانات كوبون الخصم "${cleanCode}" وتفعيلها فوراً.`,
+          type: "success",
+          confirmText: "رائع",
+        });
       } else {
         const newId = `coupon-${cleanCode.toLowerCase()}`;
         const newCoupon: CouponDoc = {
@@ -168,23 +226,41 @@ function AdminCouponsPage() {
           usedCount: 0,
           createdAt: new Date().toISOString(),
         };
-        await setDoc(doc(db, "coupons", newId), newCoupon);
-        if (session) {
-          await logActivity({
-            adminUid: session.user.uid,
-            adminName: session.admin.displayName,
-            action: "coupon_created",
-            entityType: "settings",
-            entityId: newId,
-            after: newCoupon as unknown as Record<string, unknown>,
-          });
-        }
-      }
+        updatedList = [...coupons, newCoupon];
+        setCoupons(updatedList);
+        saveCouponsToLocal(updatedList);
 
-      setIsModalOpen(false);
+        try {
+          await setDoc(doc(db, "coupons", newId), newCoupon);
+          if (session) {
+            await logActivity({
+              adminUid: session.user.uid,
+              adminName: session.admin.displayName,
+              action: "coupon_created",
+              entityType: "settings",
+              entityId: newId,
+              after: newCoupon as unknown as Record<string, unknown>,
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Firestore coupon create error:", dbErr);
+        }
+
+        setIsModalOpen(false);
+        await appAlert({
+          title: "تم إنشاء الكوبون بنجاح",
+          message: `كوبون "${cleanCode}" بخصم ${discount}% أصبح جاهزاً للاستخدام.`,
+          type: "success",
+          confirmText: "تم",
+        });
+      }
     } catch (err) {
       console.error("Failed to save coupon:", err);
-      alert("حدث خطأ أثناء حفظ الكوبون");
+      await appAlert({
+        title: "خطأ في حفظ الكوبون",
+        message: "حدث خطأ غير متوقع أثناء حفظ الكوبون. يرجى التحقق والمحاولة ثانية.",
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -192,32 +268,65 @@ function AdminCouponsPage() {
 
   async function toggleActive(c: CouponDoc) {
     try {
+      const nextActive = !c.active;
+      const updatedList = coupons.map((item) => (item.id === c.id ? { ...item, active: nextActive } : item));
+      setCoupons(updatedList);
+      saveCouponsToLocal(updatedList);
+
       await updateDoc(doc(db, "coupons", c.id), {
-        active: !c.active,
+        active: nextActive,
         updatedAt: new Date().toISOString(),
-      });
+      }).catch((err) => console.warn("Firestore toggle coupon error:", err));
     } catch (err) {
       console.error("Failed to toggle coupon active state:", err);
     }
   }
 
   async function handleDelete(c: CouponDoc) {
-    if (!confirm(`هل أنت متأكد من حذف كوبون: "${c.code}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الكوبون",
+      message: `هل أنت متأكد من رغبتك في حذف كود الخصم "${c.code}"؟ لن يتمكن العملاء من استخدامه بعد الآن.`,
+      confirmText: "نعم، حذف الكوبون",
+      cancelText: "إلغاء",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
+
     try {
-      await deleteDoc(doc(db, "coupons", c.id));
-      if (session) {
-        await logActivity({
-          adminUid: session.user.uid,
-          adminName: session.admin.displayName,
-          action: "coupon_deleted",
-          entityType: "settings",
-          entityId: c.id,
-          before: c as unknown as Record<string, unknown>,
-        });
+      const updatedList = coupons.filter((item) => item.id !== c.id);
+      setCoupons(updatedList);
+      saveCouponsToLocal(updatedList);
+
+      try {
+        await deleteDoc(doc(db, "coupons", c.id));
+        if (session) {
+          await logActivity({
+            adminUid: session.user.uid,
+            adminName: session.admin.displayName,
+            action: "coupon_deleted",
+            entityType: "settings",
+            entityId: c.id,
+            before: c as unknown as Record<string, unknown>,
+          }).catch(() => {});
+        }
+      } catch (dbErr) {
+        console.warn("Firestore coupon delete error:", dbErr);
       }
+
+      await appAlert({
+        title: "تم الحذف بنجاح",
+        message: `تم حذف الكوبون "${c.code}" بنجاح.`,
+        type: "success",
+        confirmText: "حسناً",
+      });
     } catch (err) {
       console.error("Failed to delete coupon:", err);
-      alert("حدث خطأ أثناء حذف الكوبون");
+      await appAlert({
+        title: "تعذر حذف الكوبون",
+        message: "حدث خطأ أثناء محاولة حذف الكوبون.",
+        type: "error",
+      });
     }
   }
 

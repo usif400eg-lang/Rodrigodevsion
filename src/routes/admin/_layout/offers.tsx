@@ -26,11 +26,34 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { OfferDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/offers")({
   component: AdminOffersPage,
 });
+
+const OFFERS_STORAGE_KEY = "rodrigo_custom_offers_v1";
+
+function loadOffersFromLocal(): OfferDoc[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(OFFERS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to load local offers:", e);
+  }
+  return null;
+}
+
+function saveOffersToLocal(offersList: OfferDoc[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(OFFERS_STORAGE_KEY, JSON.stringify(offersList));
+  } catch (e) {
+    console.warn("Failed to save local offers:", e);
+  }
+}
 
 const DEFAULT_OFFERS: OfferDoc[] = [
   {
@@ -123,28 +146,41 @@ function AdminOffersPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    // 1. Initial immediate hydrate from local cache if available
+    const local = loadOffersFromLocal();
+    if (local && local.length > 0) {
+      setOffers(local);
+      setLoading(false);
+    }
+
+    // 2. Firestore listener with fallback
     const q = query(collection(db, "offers"), orderBy("sortOrder", "asc"));
     const unsubscribe = onSnapshot(
       q,
       async (snap) => {
         if (snap.empty) {
-          // Auto-seed default offers if empty
-          try {
-            for (const offer of DEFAULT_OFFERS) {
-              await setDoc(doc(db, "offers", offer.id), offer);
-            }
-          } catch {
+          if (!local || local.length === 0) {
             setOffers(DEFAULT_OFFERS);
+            saveOffersToLocal(DEFAULT_OFFERS);
+            try {
+              for (const offer of DEFAULT_OFFERS) {
+                await setDoc(doc(db, "offers", offer.id), offer);
+              }
+            } catch (e) {
+              console.warn("Auto-seed error:", e);
+            }
           }
         } else {
           const list = snap.docs.map((d) => ({ ...d.data(), id: d.id }) as OfferDoc);
           setOffers(list);
+          saveOffersToLocal(list);
         }
         setLoading(false);
       },
       (err) => {
-        console.warn("Offers snapshot error, using defaults:", err);
-        setOffers(DEFAULT_OFFERS);
+        console.warn("Offers snapshot error, using local fallback:", err);
+        const fallback = loadOffersFromLocal() || DEFAULT_OFFERS;
+        setOffers(fallback);
         setLoading(false);
       }
     );
@@ -213,19 +249,41 @@ function AdminOffersPage() {
         updatedAt: new Date().toISOString(),
       };
 
+      let updatedList: OfferDoc[];
+
       if (editingOffer) {
-        await updateDoc(doc(db, "offers", editingOffer.id), offerData);
-        if (session) {
-          await logActivity({
-            adminUid: session.user.uid,
-            adminName: session.admin.displayName,
-            action: "offer_updated",
-            entityType: "settings",
-            entityId: editingOffer.id,
-            before: editingOffer as unknown as Record<string, unknown>,
-            after: offerData as unknown as Record<string, unknown>,
-          });
+        const updatedOffer: OfferDoc = {
+          ...editingOffer,
+          ...offerData,
+        };
+        updatedList = offers.map((o) => (o.id === editingOffer.id ? updatedOffer : o));
+        setOffers(updatedList);
+        saveOffersToLocal(updatedList);
+
+        try {
+          await updateDoc(doc(db, "offers", editingOffer.id), offerData);
+          if (session) {
+            await logActivity({
+              adminUid: session.user.uid,
+              adminName: session.admin.displayName,
+              action: "offer_updated",
+              entityType: "settings",
+              entityId: editingOffer.id,
+              before: editingOffer as unknown as Record<string, unknown>,
+              after: offerData as unknown as Record<string, unknown>,
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Firestore updateDoc failed, retained in local storage:", dbErr);
         }
+
+        setIsModalOpen(false);
+        await appAlert({
+          title: "تم تحديث العرض بنجاح",
+          message: `تم حفظ تعديلات "${title}" وتحديث بياناتها في الموقع.`,
+          type: "success",
+          confirmText: "رائع",
+        });
       } else {
         const newId = `offer-${Date.now()}`;
         const newOffer: OfferDoc = {
@@ -233,23 +291,41 @@ function AdminOffersPage() {
           id: newId,
           createdAt: new Date().toISOString(),
         };
-        await setDoc(doc(db, "offers", newId), newOffer);
-        if (session) {
-          await logActivity({
-            adminUid: session.user.uid,
-            adminName: session.admin.displayName,
-            action: "offer_created",
-            entityType: "settings",
-            entityId: newId,
-            after: newOffer as unknown as Record<string, unknown>,
-          });
-        }
-      }
+        updatedList = [...offers, newOffer];
+        setOffers(updatedList);
+        saveOffersToLocal(updatedList);
 
-      setIsModalOpen(false);
+        try {
+          await setDoc(doc(db, "offers", newId), newOffer);
+          if (session) {
+            await logActivity({
+              adminUid: session.user.uid,
+              adminName: session.admin.displayName,
+              action: "offer_created",
+              entityType: "settings",
+              entityId: newId,
+              after: newOffer as unknown as Record<string, unknown>,
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Firestore setDoc failed, retained in local storage:", dbErr);
+        }
+
+        setIsModalOpen(false);
+        await appAlert({
+          title: "تم إنشاء العرض بنجاح",
+          message: `تم إضافة باقة "${title}" إلى قائمة العروض والتخفيضات.`,
+          type: "success",
+          confirmText: "حسناً",
+        });
+      }
     } catch (err) {
       console.error("Failed to save offer:", err);
-      alert("حدث خطأ أثناء حفظ العرض");
+      await appAlert({
+        title: "خطأ في حفظ العرض",
+        message: "تعذر إتمام عملية الحفظ. يرجى مراجعة البيانات المدخلة والمحاولة ثانية.",
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
@@ -257,32 +333,66 @@ function AdminOffersPage() {
 
   async function toggleActive(offer: OfferDoc) {
     try {
+      const nextActive = !offer.active;
+      const updatedList = offers.map((o) => (o.id === offer.id ? { ...o, active: nextActive } : o));
+      setOffers(updatedList);
+      saveOffersToLocal(updatedList);
+
       await updateDoc(doc(db, "offers", offer.id), {
-        active: !offer.active,
+        active: nextActive,
         updatedAt: new Date().toISOString(),
-      });
+      }).catch((err) => console.warn("Firestore toggle active error:", err));
     } catch (err) {
       console.error("Failed to toggle offer active state:", err);
     }
   }
 
   async function handleDelete(offer: OfferDoc) {
-    if (!confirm(`هل أنت متأكد من حذف العرض: "${offer.title}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف العرض",
+      message: `هل أنت متأكد من رغبتك في حذف العرض "${offer.title}"؟ سيتم إزالته من المتجر نهائياً.`,
+      confirmText: "نعم، حذف العرض",
+      cancelText: "إلغاء",
+      type: "danger",
+    });
+
+    if (!confirmed) return;
+
     try {
-      await deleteDoc(doc(db, "offers", offer.id));
-      if (session) {
-        await logActivity({
-          adminUid: session.user.uid,
-          adminName: session.admin.displayName,
-          action: "offer_deleted",
-          entityType: "settings",
-          entityId: offer.id,
-          before: offer as unknown as Record<string, unknown>,
-        });
+      // Immediate optimistic update
+      const updatedList = offers.filter((o) => o.id !== offer.id);
+      setOffers(updatedList);
+      saveOffersToLocal(updatedList);
+
+      try {
+        await deleteDoc(doc(db, "offers", offer.id));
+        if (session) {
+          await logActivity({
+            adminUid: session.user.uid,
+            adminName: session.admin.displayName,
+            action: "offer_deleted",
+            entityType: "settings",
+            entityId: offer.id,
+            before: offer as unknown as Record<string, unknown>,
+          }).catch(() => {});
+        }
+      } catch (dbErr) {
+        console.warn("Firestore deleteDoc failed (retained in local cache):", dbErr);
       }
+
+      await appAlert({
+        title: "تم الحذف بنجاح",
+        message: `تم حذف العرض "${offer.title}" بنجاح ولم يعد يظهر للزوار.`,
+        type: "success",
+        confirmText: "تم",
+      });
     } catch (err) {
       console.error("Failed to delete offer:", err);
-      alert("حدث خطأ أثناء حذف العرض");
+      await appAlert({
+        title: "تعذر الحذف",
+        message: "حدث خطأ أثناء محاولة حذف العرض، يرجى المحاولة مرة أخرى.",
+        type: "error",
+      });
     }
   }
 

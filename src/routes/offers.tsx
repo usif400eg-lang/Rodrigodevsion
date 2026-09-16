@@ -84,6 +84,26 @@ function OffersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Initial local cache check
+    if (typeof window !== "undefined") {
+      try {
+        const localOffers = localStorage.getItem("rodrigo_custom_offers_v1");
+        if (localOffers) {
+          const parsed = JSON.parse(localOffers) as OfferDoc[];
+          const filtered = parsed.filter((o) => o.active !== false);
+          if (filtered.length > 0) setOffers(filtered);
+        }
+        const localCoupons = localStorage.getItem("rodrigo_custom_coupons_v1");
+        if (localCoupons) {
+          const parsedC = JSON.parse(localCoupons) as CouponDoc[];
+          const filteredC = parsedC.filter((c) => c.active !== false);
+          if (filteredC.length > 0) setCoupons(filteredC);
+        }
+      } catch (e) {
+        console.warn("Error reading local cache for offers:", e);
+      }
+    }
+
     // Load Offers
     const unsubOffers = onSnapshot(
       collection(db, "offers"),

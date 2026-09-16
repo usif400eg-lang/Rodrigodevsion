@@ -22,6 +22,7 @@ import { db } from "@/lib/firebase";
 import { deleteFileFromStorage, uploadFileToStorage } from "@/lib/firebase-storage";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 
 export const Route = createFileRoute("/admin/_layout/media")({
   component: AdminMediaPage,
@@ -107,7 +108,13 @@ function AdminMediaPage() {
 
   async function handleDelete(item: MediaItem) {
     if (!session) return;
-    if (!confirm(`هل أنت متأكد من حذف الملف "${item.name}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الملف",
+      message: `هل أنت متأكد من حذف الملف "${item.name}"؟`,
+      confirmText: "نعم، حذف",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteFileFromStorage(item.storagePath);
@@ -118,6 +125,11 @@ function AdminMediaPage() {
         action: `حذف ملف وسائط ${item.name}`,
         entityType: "settings",
         entityId: item.id,
+      });
+      await appAlert({
+        title: "تم الحذف",
+        message: "تم حذف الملف بنجاح.",
+        type: "success",
       });
     } catch (err) {
       console.error(err);

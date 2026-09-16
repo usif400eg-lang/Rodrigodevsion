@@ -28,6 +28,7 @@ import { db } from "@/lib/firebase";
 import { uploadFileToStorage } from "@/lib/firebase-storage";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { FormDoc, ServiceDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/services")({
@@ -215,10 +216,21 @@ function AdminServicesPage() {
   async function handleDelete(svc: ServiceDoc) {
     if (!session) return;
     if (session.role !== "OWNER") {
-      alert("حذف الخدمات متاح للمالك الرئيسي (OWNER) فقط.");
+      await appAlert({
+        title: "صلاحية غير كافية",
+        message: "حذف الخدمات متاح للمالك الرئيسي (OWNER) فقط.",
+        type: "warning",
+      });
       return;
     }
-    if (!confirm(`هل أنت متأكد من حذف الخدمة "${svc.name}" بشكل نهائي؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الخدمة",
+      message: `هل أنت متأكد من حذف الخدمة "${svc.name}" بشكل نهائي؟`,
+      confirmText: "نعم، حذف الخدمة",
+      cancelText: "إلغاء",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, "services", svc.id));
@@ -229,8 +241,18 @@ function AdminServicesPage() {
         entityType: "service",
         entityId: svc.id,
       });
+      await appAlert({
+        title: "تم الحذف",
+        message: `تم حذف خدمة "${svc.name}" بنجاح.`,
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
+      await appAlert({
+        title: "خطأ",
+        message: "حدث خطأ أثناء حذف الخدمة.",
+        type: "error",
+      });
     }
   }
 
@@ -252,7 +274,11 @@ function AdminServicesPage() {
       setImages((prev) => [...prev, url]);
     } catch (err) {
       console.error("Image upload failed:", err);
-      alert("تعذر رفع الصورة، يمكنك استخدام رابط الصورة المباشر.");
+      await appAlert({
+        title: "تعذر رفع الصورة",
+        message: "تعذر رفع الصورة، يمكنك استخدام رابط الصورة المباشر.",
+        type: "error",
+      });
     } finally {
       setUploadingImage(false);
       e.target.value = "";

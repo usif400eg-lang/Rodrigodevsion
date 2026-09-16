@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { BlockedUserDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/blocked-users")({
@@ -88,7 +89,13 @@ function AdminBlockedUsersPage() {
 
   async function handleUnblock(item: BlockedUserDoc) {
     if (!session) return;
-    if (!confirm(`هل أنت متأكد من فك الحظر عن "${item.telegram || item.whatsapp}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد فك الحظر",
+      message: `هل أنت متأكد من فك الحظر عن "${item.telegram || item.whatsapp}"؟`,
+      confirmText: "نعم، فك الحظر",
+      type: "info",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, "blockedUsers", item.id));
@@ -98,6 +105,11 @@ function AdminBlockedUsersPage() {
         action: `فك حظر المستخدم ${item.telegram || item.whatsapp}`,
         entityType: "settings",
         entityId: item.id,
+      });
+      await appAlert({
+        title: "تم فك الحظر",
+        message: "تم فك الحظر عن المستخدم بنجاح.",
+        type: "success",
       });
     } catch (err) {
       console.error(err);

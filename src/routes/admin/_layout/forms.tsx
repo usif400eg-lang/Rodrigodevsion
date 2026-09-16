@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { FieldType, FormDoc, QuestionDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/forms")({
@@ -187,7 +188,13 @@ function AdminFormsPage() {
 
   async function handleDeleteQuestion(qId: string) {
     if (!session) return;
-    if (!confirm("هل أنت متأكد من حذف هذا الحقل؟")) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الحقل",
+      message: "هل أنت متأكد من حذف هذا الحقل؟",
+      confirmText: "نعم، حذف",
+      type: "danger",
+    });
+    if (!confirmed) return;
     try {
       await deleteDoc(doc(db, "questions", qId));
       await logActivity({
@@ -197,6 +204,11 @@ function AdminFormsPage() {
         entityType: "settings",
         entityId: qId,
       });
+      await appAlert({
+        title: "تم الحذف",
+        message: "تم حذف الحقل بنجاح.",
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
     }
@@ -205,10 +217,20 @@ function AdminFormsPage() {
   async function handleDeleteForm(form: FormDoc) {
     if (!session) return;
     if (session.role !== "OWNER") {
-      alert("حذف النماذج متاح للمالك فقط.");
+      await appAlert({
+        title: "صلاحية غير كافية",
+        message: "حذف النماذج متاح للمالك فقط.",
+        type: "warning",
+      });
       return;
     }
-    if (!confirm(`هل أنت متأكد من حذف النموذج "${form.name}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف النموذج",
+      message: `هل أنت متأكد من حذف النموذج "${form.name}"؟`,
+      confirmText: "نعم، حذف النموذج",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, "forms", form.id));
@@ -219,6 +241,11 @@ function AdminFormsPage() {
         action: `حذف نموذج ${form.name}`,
         entityType: "settings",
         entityId: form.id,
+      });
+      await appAlert({
+        title: "تم الحذف",
+        message: `تم حذف نموذج "${form.name}" بنجاح.`,
+        type: "success",
       });
     } catch (err) {
       console.error(err);

@@ -31,6 +31,7 @@ import { uploadFileToStorage } from "@/lib/firebase-storage";
 import { seedFirestoreIfEmpty } from "@/lib/firebase-seed";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { SeoSettingsDoc } from "@/lib/firebase-types";
 import {
   SKILLS_META,
@@ -92,7 +93,11 @@ function BoosterIconsSection() {
       }
     } catch (err) {
       console.error("Upload failed:", err);
-      alert("حدث خطأ أثناء حفظ الصورة، يرجى المحاولة مرة أخرى.");
+      await appAlert({
+        title: "خطأ في الحفظ",
+        message: "حدث خطأ أثناء حفظ الصورة، يرجى المحاولة مرة أخرى.",
+        type: "error",
+      });
     } finally {
       setUploading(null);
     }
@@ -107,14 +112,24 @@ function BoosterIconsSection() {
       setUrlInputs((prev) => ({ ...prev, [index]: "" }));
     } catch (err) {
       console.error("Save URL failed:", err);
-      alert("فشل حفظ الرابط.");
+      await appAlert({
+        title: "خطأ",
+        message: "فشل حفظ الرابط.",
+        type: "error",
+      });
     } finally {
       setSavingUrl(null);
     }
   }
 
   async function handleRemoveFixed(index: number) {
-    if (!confirm("هل تريد إعادة الأيقونة الافتراضية؟")) return;
+    const confirmed = await appConfirm({
+      title: "استعادة الأيقونة",
+      message: "هل تريد إعادة الأيقونة الافتراضية؟",
+      confirmText: "نعم، استعادة",
+      type: "warning",
+    });
+    if (!confirmed) return;
     setRemoving(index);
     try {
       const currentUrl = customIcons[index];
@@ -138,7 +153,11 @@ function BoosterIconsSection() {
       setNewUrl(url);
     } catch (err) {
       console.error("Extra icon upload failed:", err);
-      alert("فشل رفع الصورة.");
+      await appAlert({
+        title: "فشل الرفع",
+        message: "فشل رفع الصورة.",
+        type: "error",
+      });
     } finally {
       setUploadingExtra(false);
     }
@@ -146,7 +165,11 @@ function BoosterIconsSection() {
 
   async function handleAddExtra() {
     if (!newName.trim() || !newUrl.trim()) {
-      alert("أدخل اسم الأيقونة ورابط الصورة أو ارفع صورة.");
+      await appAlert({
+        title: "بيانات ناقصة",
+        message: "أدخل اسم الأيقونة ورابط الصورة أو ارفع صورة.",
+        type: "warning",
+      });
       return;
     }
     setAddingExtra(true);
@@ -163,7 +186,13 @@ function BoosterIconsSection() {
   }
 
   async function handleDeleteExtra(id: string, url: string) {
-    if (!confirm("هل تريد حذف هذه الأيقونة نهائياً؟")) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الأيقونة",
+      message: "هل تريد حذف هذه الأيقونة نهائياً؟",
+      confirmText: "نعم، حذف",
+      type: "danger",
+    });
+    if (!confirmed) return;
     setDeletingExtraId(id);
     try {
       if (url.includes("firebasestorage")) {
@@ -474,7 +503,13 @@ function AdminSettingsPage() {
 
   async function handleReSeed() {
     if (!session) return;
-    if (!confirm("هل تريد تشغيل استيراد البيانات الأولية للخدمات واللاعبين والأسئلة إذا كانت فارغة؟")) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد استيراد البيانات الأولية",
+      message: "هل تريد تشغيل استيراد البيانات الأولية للخدمات واللاعبين والأسئلة إذا كانت فارغة؟",
+      confirmText: "نعم، استيراد",
+      type: "info",
+    });
+    if (!confirmed) return;
 
     setSeeding(true);
     try {
@@ -486,10 +521,18 @@ function AdminSettingsPage() {
         entityType: "settings",
         entityId: "seed",
       });
-      alert("تم فحص واستيراد البيانات الأولية بنجاح!");
+      await appAlert({
+        title: "تم الاستيراد",
+        message: "تم فحص واستيراد البيانات الأولية بنجاح!",
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء الاستيراد.");
+      await appAlert({
+        title: "خطأ",
+        message: "حدث خطأ أثناء الاستيراد.",
+        type: "error",
+      });
     } finally {
       setSeeding(false);
     }
@@ -516,7 +559,11 @@ function AdminSettingsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Backup export failed:", err);
-      alert("فشل تصدير النسخة الاحتياطية.");
+      await appAlert({
+        title: "فشل التصدير",
+        message: "فشل تصدير النسخة الاحتياطية.",
+        type: "error",
+      });
     } finally {
       setExporting(false);
     }

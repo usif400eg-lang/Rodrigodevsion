@@ -24,6 +24,7 @@ import { useEffect, useMemo, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { AdminDoc, OrderDoc, OrderStatus, PaymentStatus } from "@/lib/firebase-types";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
 
@@ -199,7 +200,14 @@ function AdminOrdersListPage() {
 
   async function handleSoftDelete(order: OrderDoc) {
     if (!session) return;
-    if (!confirm(`هل أنت متأكد من رغبتك في أرشفة / حذف الطلب ${order.orderId}؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد أرشفة الطلب",
+      message: `هل أنت متأكد من رغبتك في أرشفة الطلب #${order.orderId}؟`,
+      confirmText: "نعم، أرشفة",
+      cancelText: "إلغاء",
+      type: "warning",
+    });
+    if (!confirmed) return;
     try {
       await updateDoc(doc(db, "orders", order.orderId), {
         deletedAt: new Date().toISOString(),
@@ -212,8 +220,18 @@ function AdminOrdersListPage() {
         entityType: "order",
         entityId: order.orderId,
       });
+      await appAlert({
+        title: "تمت الأرشفة",
+        message: `تم أرشفة الطلب #${order.orderId} بنجاح.`,
+        type: "success",
+      });
     } catch (err) {
       console.error("Failed to archive order:", err);
+      await appAlert({
+        title: "خطأ",
+        message: "تعذر أرشفة الطلب.",
+        type: "error",
+      });
     }
   }
 

@@ -24,6 +24,7 @@ import { db } from "@/lib/firebase";
 import { uploadFileToStorage } from "@/lib/firebase-storage";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { PlayerDoc, PlayerStyle } from "@/lib/firebase-types";
 import { UpgradeCard } from "@/components/upgrade-card";
 
@@ -174,10 +175,21 @@ function AdminPlayersPage() {
   async function handleDelete(player: PlayerDoc) {
     if (!session) return;
     if (session.role !== "OWNER") {
-      alert("حذف اللاعبين متاح للمالك (OWNER) فقط.");
+      await appAlert({
+        title: "صلاحية غير كافية",
+        message: "حذف اللاعبين متاح للمالك (OWNER) فقط.",
+        type: "warning",
+      });
       return;
     }
-    if (!confirm(`هل أنت متأكد من حذف اللاعب "${player.name}" نهائياً؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف بطاقة اللاعب",
+      message: `هل أنت متأكد من حذف اللاعب "${player.name}" نهائياً؟`,
+      confirmText: "نعم، حذف اللاعب",
+      cancelText: "إلغاء",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, "players", player.id));
@@ -188,8 +200,18 @@ function AdminPlayersPage() {
         entityType: "player",
         entityId: player.id,
       });
+      await appAlert({
+        title: "تم الحذف",
+        message: `تم حذف بطاقة اللاعب "${player.name}" بنجاح.`,
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
+      await appAlert({
+        title: "خطأ",
+        message: "حدث خطأ أثناء حذف اللاعب.",
+        type: "error",
+      });
     }
   }
 

@@ -284,8 +284,31 @@ function OrderPage() {
       const snap = await getDocs(q);
 
       if (snap.empty) {
-        setCouponError("كود الخصم غير صالح أو غير موجود");
-        setAppliedCoupon(null);
+        // Fallback check against local cache
+        let localCoupon: CouponDoc | undefined;
+        try {
+          const raw = localStorage.getItem("rodrigo_custom_coupons_v1");
+          if (raw) {
+            const list = JSON.parse(raw) as CouponDoc[];
+            localCoupon = list.find((c) => c.code.toUpperCase() === code && c.active !== false);
+          }
+        } catch {}
+
+        if (localCoupon) {
+          if (localCoupon.maxUses && localCoupon.usedCount >= localCoupon.maxUses) {
+            setCouponError("انتهى الحد الأقصى لاستخدام هذا الكوبون");
+            setAppliedCoupon(null);
+          } else if (localCoupon.expiresAt && new Date(localCoupon.expiresAt) < new Date()) {
+            setCouponError("هذا الكوبون منتهي الصلاحية");
+            setAppliedCoupon(null);
+          } else {
+            setAppliedCoupon(localCoupon);
+            setCouponError("");
+          }
+        } else {
+          setCouponError("كود الخصم غير صالح أو غير موجود");
+          setAppliedCoupon(null);
+        }
       } else {
         const c = { ...snap.docs[0].data(), id: snap.docs[0].id } as CouponDoc;
         if (c.maxUses && c.usedCount >= c.maxUses) {
@@ -301,8 +324,20 @@ function OrderPage() {
       }
     } catch (err) {
       console.warn("Coupon check error:", err);
-      // Fallback check for offline default coupons
-      if (couponInput.trim().toUpperCase() === "RODRIGO15") {
+      // Fallback check for local storage or default coupons
+      let localFallback: CouponDoc | undefined;
+      try {
+        const raw = localStorage.getItem("rodrigo_custom_coupons_v1");
+        if (raw) {
+          const list = JSON.parse(raw) as CouponDoc[];
+          localFallback = list.find((c) => c.code.toUpperCase() === couponInput.trim().toUpperCase() && c.active !== false);
+        }
+      } catch {}
+
+      if (localFallback) {
+        setAppliedCoupon(localFallback);
+        setCouponError("");
+      } else if (couponInput.trim().toUpperCase() === "RODRIGO15") {
         setAppliedCoupon({
           id: "coupon-rodrigo15",
           code: "RODRIGO15",

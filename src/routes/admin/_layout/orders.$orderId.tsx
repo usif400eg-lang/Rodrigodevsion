@@ -32,6 +32,7 @@ import { db } from "@/lib/firebase";
 import { uploadFileToStorage } from "@/lib/firebase-storage";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type {
   AdminDoc,
   OrderDoc,
@@ -230,7 +231,14 @@ function AdminOrderDetailPage() {
   // Remove Proof Screenshot
   async function handleRemoveProof(urlToRemove: string) {
     if (!order || !session) return;
-    if (!confirm("هل أنت متأكد من حذف صورة الإثبات هذه؟")) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف الإثبات",
+      message: "هل أنت متأكد من حذف صورة الإثبات هذه؟",
+      confirmText: "نعم، حذف الصورة",
+      cancelText: "إلغاء",
+      type: "danger",
+    });
+    if (!confirmed) return;
     try {
       const updatedProofs = (order.proofUrls || []).filter((u) => u !== urlToRemove);
       await updateDoc(doc(db, "orders", order.orderId), {
@@ -244,8 +252,18 @@ function AdminOrderDetailPage() {
         entityType: "order",
         entityId: order.orderId,
       });
+      await appAlert({
+        title: "تم الحذف",
+        message: "تم حذف صورة الإثبات بنجاح.",
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
+      await appAlert({
+        title: "خطأ",
+        message: "تعذر حذف صورة الإثبات.",
+        type: "error",
+      });
     }
   }
 

@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert, appConfirm } from "@/components/ui/app-modal";
 import type { FaqDoc } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/faq")({
@@ -112,7 +113,13 @@ function AdminFaqPage() {
 
   async function handleDelete(f: FaqDoc) {
     if (!session) return;
-    if (!confirm(`هل أنت متأكد من حذف السؤال "${f.question}"؟`)) return;
+    const confirmed = await appConfirm({
+      title: "تأكيد حذف السؤال",
+      message: `هل أنت متأكد من حذف السؤال "${f.question}"؟`,
+      confirmText: "نعم، حذف",
+      type: "danger",
+    });
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, "faq", f.id));
@@ -122,6 +129,11 @@ function AdminFaqPage() {
         action: `حذف سؤال شائع: ${f.question}`,
         entityType: "faq",
         entityId: f.id,
+      });
+      await appAlert({
+        title: "تم الحذف",
+        message: "تم حذف السؤال بنجاح.",
+        type: "success",
       });
     } catch (err) {
       console.error(err);

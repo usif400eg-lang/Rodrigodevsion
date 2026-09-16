@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { logActivity } from "@/lib/admin-auth";
 import { useAdminStore } from "@/lib/admin-store";
+import { appAlert } from "@/components/ui/app-modal";
 import type { AdminDoc, AdminRole } from "@/lib/firebase-types";
 
 export const Route = createFileRoute("/admin/_layout/users")({
@@ -197,7 +198,11 @@ function AdminUsersPage() {
   async function handleToggleActive(admin: AdminDoc) {
     if (!session) return;
     if (admin.uid === session.admin.uid) {
-      alert("لا يمكنك تعطيل حسابك الخاص!");
+      await appAlert({
+        title: "غير مسموح",
+        message: "لا يمكنك تعطيل حسابك الخاص!",
+        type: "warning",
+      });
       return;
     }
 
@@ -220,7 +225,11 @@ function AdminUsersPage() {
   async function handlePermanentDelete() {
     if (!session || !deletingAdmin || session.role !== "OWNER") return;
     if (deletingAdmin.uid === session.admin.uid) {
-      alert("لا يمكنك حذف حسابك الخاص!");
+      await appAlert({
+        title: "غير مسموح",
+        message: "لا يمكنك حذف حسابك الخاص!",
+        type: "warning",
+      });
       return;
     }
     if (deleteInput.trim() !== "DELETE") return;
